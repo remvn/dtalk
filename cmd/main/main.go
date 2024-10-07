@@ -1,7 +1,8 @@
 package main
 
 import (
-	"dtalk/internal/server"
+	"dtalk/internal/dtalk"
+	"dtalk/internal/handler"
 	"log"
 	"os"
 	"strconv"
@@ -10,7 +11,7 @@ import (
 )
 
 func main() {
-	godotenv.Load()
+	_ = godotenv.Load()
 
 	port, err := strconv.Atoi(os.Getenv("PORT"))
 	if err != nil {
@@ -18,12 +19,12 @@ func main() {
 	}
 	_ = os.Getenv("APP_ENV")
 
-	info := server.LiveKitInfo{
+	info := dtalk.LkOptions{
 		HostURL:   os.Getenv("LIVEKIT_HOST_URL"),
 		ApiKey:    os.Getenv("LIVEKIT_API_KEY"),
 		ApiSecret: os.Getenv("LIVEKIT_API_SECRET"),
 	}
-	server := server.NewServer(info)
+	server := handler.NewServer(info)
 
 	server.Start(port)
 }
