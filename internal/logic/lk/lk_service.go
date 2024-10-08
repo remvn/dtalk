@@ -1,9 +1,9 @@
-package dtalk
+package lk
 
 import (
 	"context"
-	"dtalk/internal/data/cmap"
-	"dtalk/internal/util"
+	"dtalk/internal/pkg/cmap"
+	"dtalk/internal/pkg/random"
 	"errors"
 	"time"
 
@@ -12,26 +12,26 @@ import (
 	lksdk "github.com/livekit/server-sdk-go/v2"
 )
 
-type LkService struct {
+type Service struct {
 	roomClient *lksdk.RoomServiceClient
-	options    LkOptions
+	options    Config
 
 	meetings *cmap.CMap[string, *Meeting]
 }
 
-type LkOptions struct {
+type Config struct {
 	HostURL   string
 	ApiKey    string
 	ApiSecret string
 }
 
-func NewLkService(options LkOptions) *LkService {
+func NewLkService(options Config) *Service {
 	roomClient := lksdk.NewRoomServiceClient(
 		options.HostURL,
 		options.ApiKey,
 		options.ApiSecret,
 	)
-	service := &LkService{
+	service := &Service{
 		roomClient: roomClient,
 		options:    options,
 	}
@@ -39,7 +39,12 @@ func NewLkService(options LkOptions) *LkService {
 	return service
 }
 
-func (service *LkService) GetJoinToken(roomId, userId string) (string, error) {
+type JoinTokenParams struct {
+	Id   string
+	Name string
+}
+
+func (service *Service) GetJoinToken(roomId string, params JoinTokenParams) (string, error) {
 	options := service.options
 	accessToken := auth.NewAccessToken(options.ApiKey, options.ApiSecret)
 	grant := &auth.VideoGrant{
@@ -48,7 +53,8 @@ func (service *LkService) GetJoinToken(roomId, userId string) (string, error) {
 	}
 
 	accessToken.AddGrant(grant).
-		SetIdentity(userId).
+		SetIdentity(params.Id).
+		SetName(params.Name).
 		SetValidFor(time.Hour)
 
 	token, err := accessToken.ToJWT()
@@ -58,10 +64,10 @@ func (service *LkService) GetJoinToken(roomId, userId string) (string, error) {
 	return token, nil
 }
 
-func (service *LkService) createRoom() (*livekit.Room, error) {
+func (service *Service) createRoom() (*livekit.Room, error) {
 	client := service.roomClient
 
-	roomId := util.RandId()
+	roomId := random.GenerateID()
 	room, err := client.CreateRoom(context.Background(), &livekit.CreateRoomRequest{
 		Name:            roomId,
 		EmptyTimeout:    10 * 60, // 10 minutes
@@ -84,7 +90,7 @@ type MeetingOptions struct {
 	RoomName string
 }
 
-func (service *LkService) CreateMeeting(options MeetingOptions) (*Meeting, error) {
+func (service *Service) CreateMeeting(options MeetingOptions) (*Meeting, error) {
 	room, err := service.createRoom()
 	if err != nil {
 		return nil, err
@@ -100,7 +106,7 @@ func (service *LkService) CreateMeeting(options MeetingOptions) (*Meeting, error
 
 var ErrRoomNonExistent = errors.New("No longer available or non-existent room")
 
-func (service *LkService) GetRoom(roomId string) (*livekit.Room, error) {
+func (service *Service) GetRoom(roomId string) (*livekit.Room, error) {
 	res, err := service.roomClient.ListRooms(context.Background(), &livekit.ListRoomsRequest{
 		Names: []string{roomId},
 	})
@@ -113,7 +119,7 @@ func (service *LkService) GetRoom(roomId string) (*livekit.Room, error) {
 	return res.Rooms[0], nil
 }
 
-func (service *LkService) ListUsers(roomId string) ([]*livekit.ParticipantInfo, error) {
+func (service *Service) ListUsers(roomId string) ([]*livekit.ParticipantInfo, error) {
 	res, err := service.roomClient.ListParticipants(
 		context.Background(),
 		&livekit.ListParticipantsRequest{

@@ -1,4 +1,4 @@
-package util
+package random
 
 import (
 	"math/rand"
@@ -20,6 +20,6 @@ func RandString(n int) string {
 	return string(b)
 }
 
-func RandId() string {
+func GenerateID() string {
 	return RandString(20)
 }

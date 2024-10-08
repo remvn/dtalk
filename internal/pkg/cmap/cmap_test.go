@@ -1,7 +1,7 @@
 package cmap_test
 
 import (
-	"dtalk/internal/data/cmap"
+	"dtalk/internal/pkg/cmap"
 	"sync"
 	"testing"
 

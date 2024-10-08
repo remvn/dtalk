@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"dtalk/internal/dtalk"
+	"dtalk/internal/logic/lk"
 	"log"
 	"net/http"
 
@@ -9,11 +9,14 @@ import (
 )
 
 type MeetingHandler struct {
-	lkService  *dtalk.LkService
+	lkService  *lk.Service
 	echoServer *echo.Echo
 }
 
-func NewMeetingHandler(echoServer *echo.Echo, lkService *dtalk.LkService) *MeetingHandler {
+func NewMeetingHandler(
+	echoServer *echo.Echo,
+	lkService *lk.Service,
+) *MeetingHandler {
 	handler := &MeetingHandler{
 		echoServer: echoServer,
 		lkService:  lkService,
@@ -28,8 +31,9 @@ func (handler *MeetingHandler) Register() {
 }
 
 type createMeetingDto struct {
+	Id       string `json:"id"`
+	Name     string `json:"name"`
 	RoomName string `json:"room_name"`
-	HostId   string `json:"host_id"`
 }
 
 type createMeetingRes struct {
@@ -43,8 +47,8 @@ func (handler *MeetingHandler) create(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	meeting, err := handler.lkService.CreateMeeting(dtalk.MeetingOptions{
-		HostId:   dto.HostId,
+	meeting, err := handler.lkService.CreateMeeting(lk.MeetingOptions{
+		HostId:   dto.Id,
 		RoomName: dto.RoomName,
 	})
 	if err != nil {
@@ -52,7 +56,10 @@ func (handler *MeetingHandler) create(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	joinToken, err := handler.lkService.GetJoinToken(meeting.RoomId, dto.HostId)
+	joinToken, err := handler.lkService.GetJoinToken(meeting.RoomId, lk.JoinTokenParams{
+		Id:   dto.Id,
+		Name: dto.Name,
+	})
 	if err != nil {
 		log.Println(err)
 		return c.NoContent(http.StatusInternalServerError)

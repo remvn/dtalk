@@ -1,7 +1,9 @@
 package handler
 
 import (
-	"dtalk/internal/dtalk"
+	"dtalk/internal/config"
+	"dtalk/internal/logic/lk"
+	"dtalk/internal/middleware"
 	"fmt"
 	"log"
 
@@ -10,17 +12,30 @@ import (
 
 type Server struct {
 	echoServer *echo.Echo
-	LkService  *dtalk.LkService
+	LkService  *lk.Service
 }
 
-func NewServer(lkOptions dtalk.LkOptions) *Server {
+type ServerConfig struct {
+	AuthTokenConfig config.JwtTokenConfig
+}
+
+func NewServer(config ServerConfig, lkConfig lk.Config) *Server {
 	echoServer := echo.New()
-	lkService := dtalk.NewLkService(lkOptions)
+	lkService := lk.NewLkService(lkConfig)
 
 	server := &Server{
 		echoServer: echoServer,
 		LkService:  lkService,
 	}
+
+	authMiddleware := middleware.NewAuthMiddleware(config.AuthTokenConfig)
+
+	authHandler := NewAuthHandler(
+		config.AuthTokenConfig,
+		echoServer,
+		authMiddleware,
+	)
+	authHandler.Register()
 
 	meetingHandler := NewMeetingHandler(echoServer, lkService)
 	meetingHandler.Register()
