@@ -37,7 +37,11 @@ func NewServer(config ServerConfig, lkConfig lk.Config) *Server {
 	)
 	authHandler.Register()
 
-	meetingHandler := NewMeetingHandler(echoServer, lkService)
+	meetingHandler := NewMeetingHandler(
+		echoServer,
+		lkService,
+		authMiddleware,
+	)
 	meetingHandler.Register()
 
 	return server

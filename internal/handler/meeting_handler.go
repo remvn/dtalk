@@ -2,6 +2,7 @@ package handler
 
 import (
 	"dtalk/internal/logic/lk"
+	"dtalk/internal/middleware"
 	"log"
 	"net/http"
 
@@ -9,23 +10,27 @@ import (
 )
 
 type MeetingHandler struct {
-	lkService  *lk.Service
-	echoServer *echo.Echo
+	lkService      *lk.Service
+	echoServer     *echo.Echo
+	authMiddleware *middleware.AuthMiddleware
 }
 
 func NewMeetingHandler(
 	echoServer *echo.Echo,
 	lkService *lk.Service,
+	authMiddleware *middleware.AuthMiddleware,
 ) *MeetingHandler {
 	handler := &MeetingHandler{
-		echoServer: echoServer,
-		lkService:  lkService,
+		echoServer:     echoServer,
+		lkService:      lkService,
+		authMiddleware: authMiddleware,
 	}
 	return handler
 }
 
 func (handler *MeetingHandler) Register() {
 	group := handler.echoServer.Group("meeting")
+	handler.authMiddleware.Apply(group)
 	group.POST("/create", handler.create)
 	group.POST("/join-request", handler.joinRequest)
 }
