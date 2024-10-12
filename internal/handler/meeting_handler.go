@@ -36,8 +36,6 @@ func (handler *MeetingHandler) Register() {
 }
 
 type createMeetingDto struct {
-	Id       string `json:"id"`
-	Name     string `json:"name"`
 	RoomName string `json:"room_name"`
 }
 
@@ -52,8 +50,14 @@ func (handler *MeetingHandler) create(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
+	userInfo, err := middleware.ExtractUserInfo(c)
+	if err != nil {
+		log.Println(err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
 	meeting, err := handler.lkService.CreateMeeting(lk.MeetingOptions{
-		HostId:   dto.Id,
+		HostId:   userInfo.ID,
 		RoomName: dto.RoomName,
 	})
 	if err != nil {
@@ -62,8 +66,8 @@ func (handler *MeetingHandler) create(c echo.Context) error {
 	}
 
 	joinToken, err := handler.lkService.GetJoinToken(meeting.RoomId, lk.JoinTokenParams{
-		Id:   dto.Id,
-		Name: dto.Name,
+		UserID:   userInfo.ID,
+		UserName: userInfo.Name,
 	})
 	if err != nil {
 		log.Println(err)

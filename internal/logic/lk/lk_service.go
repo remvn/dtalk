@@ -40,8 +40,8 @@ func NewLkService(options Config) *Service {
 }
 
 type JoinTokenParams struct {
-	Id   string
-	Name string
+	UserID   string
+	UserName string
 }
 
 func (service *Service) GetJoinToken(roomId string, params JoinTokenParams) (string, error) {
@@ -53,8 +53,8 @@ func (service *Service) GetJoinToken(roomId string, params JoinTokenParams) (str
 	}
 
 	accessToken.AddGrant(grant).
-		SetIdentity(params.Id).
-		SetName(params.Name).
+		SetIdentity(params.UserID).
+		SetName(params.UserName).
 		SetValidFor(time.Hour)
 
 	token, err := accessToken.ToJWT()

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import MeetingCreateDialog from '@/components/MeetingCreateDialog.vue'
+import NavBar from '@/components/NavBar.vue'
 import { Button } from '@/components/ui/button'
 </script>
 
 <template>
-    <div>TODO: logo, navbar here</div>
+    <NavBar></NavBar>
     <div class="flex-grow grid grid-cols-1 md:grid-cols-2">
         <div class="flex justify-center items-center p-6">
             <div class="xl:w-4/6">

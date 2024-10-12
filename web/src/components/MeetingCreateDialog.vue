@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { h, ref } from 'vue'
+import { ref } from 'vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 
 import { Button } from '@/components/ui/button'
 import {
-    Form,
     FormControl,
     FormDescription,
     FormField,
@@ -25,12 +24,15 @@ import {
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/toast'
 import { useForm } from 'vee-validate'
+import { useUserInfo } from '@/stores/user-info'
+import { createMeeting, requestToken } from '@/services/user-service'
 
 const isOpen = ref(false)
 
 const formSchema = toTypedSchema(
     z.object({
-        name: z.string().min(2).max(50)
+        name: z.string().min(2).max(50),
+        room_name: z.string().min(2).max(50)
     })
 )
 
@@ -38,16 +40,27 @@ const form = useForm({
     validationSchema: formSchema
 })
 
-const onSubmit = form.handleSubmit((values) => {
-    isOpen.value = false
-    toast({
-        title: 'You submitted the following values:',
-        description: h(
-            'pre',
-            { class: 'mt-2 w-[340px] rounded-md bg-slate-950 p-4' },
-            h('code', { class: 'text-white' }, JSON.stringify(values, null, 2))
-        )
-    })
+const userInfo = useUserInfo()
+
+const onSubmit = form.handleSubmit(async (values) => {
+    try {
+        isOpen.value = false
+        let json = await requestToken({ name: values.name })
+        userInfo.setInfo({
+            name: values.name,
+            token: json.access_token
+        })
+        json = await createMeeting({
+            room_name: values.room_name
+        })
+    } catch (e) {
+        toast({
+            title: 'An error happened',
+            description: 'Please try again later.',
+            variant: 'destructive'
+        })
+        console.log(e)
+    }
 })
 </script>
 
@@ -62,17 +75,31 @@ const onSubmit = form.handleSubmit((values) => {
                 <DialogDescription> </DialogDescription>
             </DialogHeader>
 
-            <form @submit="onSubmit">
+            <form class="space-y-4" @submit="onSubmit">
+                <FormField v-slot="{ componentField }" name="room_name">
+                    <FormItem>
+                        <FormLabel>Room name:</FormLabel>
+                        <FormControl>
+                            <Input
+                                type="text"
+                                placeholder="Enter room name.."
+                                v-bind="componentField"
+                            />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                </FormField>
                 <FormField v-slot="{ componentField }" name="name">
                     <FormItem>
                         <FormLabel>Your display name:</FormLabel>
                         <FormControl>
                             <Input
                                 type="text"
-                                placeholder="Type your display name here"
+                                placeholder="Enter your display name.."
                                 v-bind="componentField"
                             />
                         </FormControl>
+                        <FormDescription> Other people will see this as your name </FormDescription>
                         <FormMessage />
                     </FormItem>
                 </FormField>
