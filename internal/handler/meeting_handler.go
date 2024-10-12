@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"dtalk/internal/dtalk"
 	"dtalk/internal/logic/lk"
 	"dtalk/internal/middleware"
 	"log"
@@ -60,7 +61,7 @@ func (handler *MeetingHandler) create(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &createMeetingRes{
-		RoomID: meeting.Data.RoomId,
+		RoomID: meeting.Data.RoomID,
 	})
 }
 
@@ -87,28 +88,47 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 
 	meeting, err := handler.lkService.GetMeeting(dto.RoomID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, joinMeetingRes{
+		return c.JSON(http.StatusNotFound, joinMeetingRes{
 			OK:      false,
 			Message: lk.ErrRoomNonExistent.Error(),
 		})
 	}
 
 	// room is just created, first one in will be the host
-	if meeting.Data.HostId == "" {
-		token, err := handler.lkService.GetJoinToken(meeting.Room.Name, lk.JoinTokenParams{
+	if meeting.Data.HostID == "" {
+		token, err := handler.lkService.GetJoinToken(meeting.Data.RoomID, lk.JoinTokenParams{
 			UserID: userInfo.ID,
 		})
 		if err != nil {
 			return c.NoContent(http.StatusInternalServerError)
 		}
-		meeting.Data.HostId = userInfo.ID
+		meeting.Data.HostID = userInfo.ID
+		return c.JSON(http.StatusOK, joinMeetingRes{
+			OK:          true,
+			AccessToken: token,
+		})
+	}
+
+	resChan, err := handler.lkService.SetupMeetingJoinRequest(userInfo, meeting.Data.RoomID)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	accepted := <-resChan
+	if accepted {
+		token, err := handler.lkService.GetJoinToken(meeting.Data.RoomID, lk.JoinTokenParams{
+			UserID: userInfo.ID,
+		})
+		if err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
 		return c.JSON(http.StatusOK, joinMeetingRes{
 			OK:          true,
 			AccessToken: token,
 		})
 	} else {
-		handler.lkService.SetupMeetingJoinRequest(userInfo, meeting.Data.RoomId)
+		return c.JSON(http.StatusUnauthorized, joinMeetingRes{
+			OK:      false,
+			Message: "Your join request gets rejected",
+		})
 	}
-
-	return nil
 }

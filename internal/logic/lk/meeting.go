@@ -2,14 +2,24 @@ package lk
 
 import (
 	"dtalk/internal/dtalk"
+	"dtalk/internal/pkg/cmap"
 	"errors"
 
 	"github.com/livekit/protocol/livekit"
 )
 
 type MeetingData struct {
-	RoomId string
-	HostId string
+	RoomID         string
+	HostID         string
+	JoinRequestMap *cmap.CMap[string, *meetingJoinRequest]
+}
+
+func NewMeetingData(roomID, hostID string) *MeetingData {
+	return &MeetingData{
+		RoomID:         roomID,
+		HostID:         hostID,
+		JoinRequestMap: cmap.New[string, *meetingJoinRequest](),
+	}
 }
 
 type Meeting struct {
@@ -43,14 +53,16 @@ func (service *Service) CreateMeeting(params CreateMeetingParams) (*Meeting, err
 	}
 
 	meeting := &Meeting{
-		Data: &MeetingData{
-			RoomId: room.GetName(),
-			HostId: "",
-		},
+		Data: NewMeetingData(room.Name, ""),
 		Room: room,
 	}
-	service.meetingMap.Set(meeting.Data.RoomId, meeting.Data)
+	service.meetingMap.Set(meeting.Data.RoomID, meeting.Data)
 	return meeting, nil
+}
+
+type meetingJoinRequest struct {
+	userInfo *dtalk.UserTokenInfo
+	result   chan<- bool
 }
 
 var ErrRoomNotReady = errors.New("This room is not ready")
@@ -58,13 +70,18 @@ var ErrRoomNotReady = errors.New("This room is not ready")
 func (service *Service) SetupMeetingJoinRequest(
 	requester *dtalk.UserTokenInfo,
 	roomID string,
-) (chan<- string, error) {
+) (<-chan bool, error) {
 	meeting, err := service.GetMeeting(roomID)
 	if err != nil {
 		return nil, err
 	}
-	if meeting.Data.HostId == "" {
+	if meeting.Data.HostID == "" {
 		return nil, ErrRoomNotReady
 	}
+	request := &meetingJoinRequest{
+		userInfo: requester,
+		result:   make(chan bool),
+	}
+	meeting.Data.JoinRequestMap.Set(requester.ID, request)
 	return nil, nil
 }
