@@ -5,10 +5,10 @@ all: build
 
 build:
 	@echo "Building..."
-	@go build -o main cmd/main/
+	@go build -o main ./cmd/main
 
 run:
-	@go run cmd/main/
+	@go run ./cmd/main
 
 test:
 	@echo "Testing..."
