@@ -6,7 +6,7 @@
     "tailwind": {
         "config": "tailwind.config.js",
         "css": "src/assets/index.css",
-        "baseColor": "stale",
+        "baseColor": "slate",
         "cssVariables": true
     },
     "framework": "vite",
