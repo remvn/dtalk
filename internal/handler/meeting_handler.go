@@ -29,10 +29,12 @@ func NewMeetingHandler(
 }
 
 func (handler *MeetingHandler) Register() {
+	protectedGroup := handler.echoServer.Group("meeting")
+	handler.authMiddleware.Apply(protectedGroup)
+	protectedGroup.POST("/join-request", handler.join)
+
 	group := handler.echoServer.Group("meeting")
-	handler.authMiddleware.Apply(group)
 	group.POST("/create", handler.create)
-	group.POST("/join-request", handler.joinRequest)
 }
 
 type createMeetingDto struct {
@@ -40,24 +42,16 @@ type createMeetingDto struct {
 }
 
 type createMeetingRes struct {
-	JoinToken string `json:"join_token"`
+	RoomID string `json:"room_id"`
 }
 
 func (handler *MeetingHandler) create(c echo.Context) error {
 	dto := &createMeetingDto{}
 	if err := c.Bind(dto); err != nil {
-		log.Println(err)
-		return c.NoContent(http.StatusInternalServerError)
+		return c.NoContent(http.StatusBadRequest)
 	}
 
-	userInfo, err := middleware.ExtractUserInfo(c)
-	if err != nil {
-		log.Println(err)
-		return c.NoContent(http.StatusInternalServerError)
-	}
-
-	meeting, err := handler.lkService.CreateMeeting(lk.MeetingOptions{
-		HostId:   userInfo.ID,
+	meeting, err := handler.lkService.CreateMeeting(lk.CreateMeetingParams{
 		RoomName: dto.RoomName,
 	})
 	if err != nil {
@@ -65,20 +59,56 @@ func (handler *MeetingHandler) create(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	joinToken, err := handler.lkService.GetJoinToken(meeting.RoomId, lk.JoinTokenParams{
-		UserID:   userInfo.ID,
-		UserName: userInfo.Name,
-	})
-	if err != nil {
-		log.Println(err)
-		return c.NoContent(http.StatusInternalServerError)
-	}
-
 	return c.JSON(http.StatusOK, &createMeetingRes{
-		JoinToken: joinToken,
+		RoomID: meeting.Data.RoomId,
 	})
 }
 
-func (handler *MeetingHandler) joinRequest(c echo.Context) error {
+type joinMeetingDto struct {
+	RoomID string `json:"room_id"`
+}
+
+type joinMeetingRes struct {
+	OK          bool   `json:"ok"`
+	Message     string `json:"message,omitempty"`
+	AccessToken string `json:"access_token,omitempty"`
+}
+
+func (handler *MeetingHandler) join(c echo.Context) error {
+	dto := &joinMeetingDto{}
+	if err := c.Bind(dto); err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	userInfo, err := middleware.ExtractUserInfo(c)
+	if err != nil {
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	meeting, err := handler.lkService.GetMeeting(dto.RoomID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, joinMeetingRes{
+			OK:      false,
+			Message: lk.ErrRoomNonExistent.Error(),
+		})
+	}
+
+	// room is just created, first one in will be the host
+	if meeting.Data.HostId == "" {
+		token, err := handler.lkService.GetJoinToken(meeting.Room.Name, lk.JoinTokenParams{
+			UserID: userInfo.ID,
+		})
+		if err != nil {
+			return c.NoContent(http.StatusInternalServerError)
+		}
+		meeting.Data.HostId = userInfo.ID
+		return c.JSON(http.StatusOK, joinMeetingRes{
+			OK:          true,
+			AccessToken: token,
+		})
+	} else {
+		handler.lkService.SetupMeetingJoinRequest(userInfo, meeting.Data.RoomId)
+	}
+
 	return nil
 }

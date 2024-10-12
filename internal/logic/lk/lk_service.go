@@ -4,6 +4,7 @@ import (
 	"context"
 	"dtalk/internal/pkg/cmap"
 	"dtalk/internal/pkg/random"
+	"encoding/json"
 	"errors"
 	"time"
 
@@ -16,7 +17,7 @@ type Service struct {
 	roomClient *lksdk.RoomServiceClient
 	options    Config
 
-	meetings *cmap.CMap[string, *Meeting]
+	meetingMap *cmap.CMap[string, *MeetingData]
 }
 
 type Config struct {
@@ -59,7 +60,7 @@ func (service *Service) GetJoinToken(roomId string, params JoinTokenParams) (str
 
 	token, err := accessToken.ToJWT()
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 	return token, nil
 }
@@ -78,30 +79,6 @@ func (service *Service) createRoom() (*livekit.Room, error) {
 	}
 
 	return room, nil
-}
-
-type Meeting struct {
-	RoomId string
-	HostId string
-}
-
-type MeetingOptions struct {
-	HostId   string
-	RoomName string
-}
-
-func (service *Service) CreateMeeting(options MeetingOptions) (*Meeting, error) {
-	room, err := service.createRoom()
-	if err != nil {
-		return nil, err
-	}
-
-	meeting := &Meeting{
-		RoomId: room.GetName(),
-		HostId: options.HostId,
-	}
-	service.meetings.Set(meeting.RoomId, meeting)
-	return meeting, nil
 }
 
 var ErrRoomNonExistent = errors.New("No longer available or non-existent room")
@@ -131,4 +108,20 @@ func (service *Service) ListUsers(roomId string) ([]*livekit.ParticipantInfo, er
 	}
 
 	return res.Participants, nil
+}
+
+func (service *Service) SendData(roomID string, destinations []string, data any) error {
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	_, err = service.roomClient.SendData(context.Background(), &livekit.SendDataRequest{
+		Room:                  roomID,
+		DestinationIdentities: destinations,
+		Data:                  bytes,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
