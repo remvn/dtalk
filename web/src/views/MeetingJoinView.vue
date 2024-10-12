@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { joinMeeting, requestToken } from '@/services/user-service'
 import { useUserInfo } from '@/stores/user-info'
+import { ref } from 'vue'
 
 const props = defineProps({
     room_id: String
@@ -32,14 +33,18 @@ const form = useForm({
 })
 
 const userInfo = useUserInfo()
+const loading = ref(false)
 
 const onSubmit = form.handleSubmit(async (values) => {
+    loading.value = true
     try {
         let json = await requestToken({ name: values.name })
         userInfo.setInfo({ name: values.name, token: json.access_token })
         json = await joinMeeting({ room_id: props.room_id! })
     } catch (e) {
         console.log(e)
+    } finally {
+        loading.value = false
     }
 })
 </script>
@@ -65,7 +70,13 @@ const onSubmit = form.handleSubmit(async (values) => {
                     <FormMessage />
                 </FormItem>
             </FormField>
-            <Button type="submit"> Join Meeting </Button>
+            <Button type="submit" :disabled="!loading">
+                <template v-if="loading">
+                    <ReloadIcon class="w-4 h-4 mr-2 animate-spin" />
+                    Waiting for the host acceptance...
+                </template>
+                <template v-else> Join Meeting </template>
+            </Button>
         </form>
     </div>
 </template>

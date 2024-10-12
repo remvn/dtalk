@@ -24,8 +24,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { toast } from '@/components/ui/toast'
 import { useForm } from 'vee-validate'
-import { useUserInfo } from '@/stores/user-info'
-import { createMeeting, requestToken } from '@/services/user-service'
+import { createMeeting } from '@/services/user-service'
+import { useRouter } from 'vue-router'
 
 const isOpen = ref(false)
 
@@ -40,19 +40,15 @@ const form = useForm({
     validationSchema: formSchema
 })
 
-const userInfo = useUserInfo()
-
+const router = useRouter()
+const loading = ref(false)
 const onSubmit = form.handleSubmit(async (values) => {
+    loading.value = true
     try {
-        isOpen.value = false
-        let json = await requestToken({ name: values.name })
-        userInfo.setInfo({
-            name: values.name,
-            token: json.access_token
-        })
-        json = await createMeeting({
+        const json = await createMeeting({
             room_name: values.room_name
         })
+        router.push(`/meeting/join?id=${json.room_id}`)
     } catch (e) {
         toast({
             title: 'An error happened',
@@ -60,6 +56,9 @@ const onSubmit = form.handleSubmit(async (values) => {
             variant: 'destructive'
         })
         console.log(e)
+    } finally {
+        loading.value = false
+        isOpen.value = false
     }
 })
 </script>
@@ -106,7 +105,10 @@ const onSubmit = form.handleSubmit(async (values) => {
             </form>
 
             <DialogFooter>
-                <Button @click="onSubmit">Create & Join</Button>
+                <Button @click="onSubmit" :disabled="!loading">
+                    <template v-if="loading">Creating...</template>
+                    <template v-else>Create</template>
+                </Button>
             </DialogFooter>
         </DialogContent>
     </Dialog>
