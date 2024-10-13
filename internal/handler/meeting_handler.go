@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"dtalk/internal/dtalk"
 	"dtalk/internal/logic/lk"
 	"dtalk/internal/middleware"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -113,12 +113,22 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
-	accepted := <-resChan
+
+	accepted := false
+	select {
+	case accepted = <-resChan:
+	case <-time.After(2 * time.Minute):
+	case <-c.Request().Context().Done():
+	}
+
+	log.Println("result: ", accepted)
+
 	if accepted {
 		token, err := handler.lkService.GetJoinToken(meeting.Data.RoomID, lk.JoinTokenParams{
 			UserID: userInfo.ID,
 		})
 		if err != nil {
+			log.Println(err)
 			return c.NoContent(http.StatusInternalServerError)
 		}
 		return c.JSON(http.StatusOK, joinMeetingRes{
