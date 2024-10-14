@@ -22,16 +22,16 @@ import {
     DialogTrigger
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { toast } from '@/components/ui/toast'
 import { useForm } from 'vee-validate'
 import { createMeeting } from '@/services/user-service'
 import { useRouter } from 'vue-router'
+import { getResMessage } from '@/services/fetching'
+import { errorToast } from '@/services/toast'
 
 const isOpen = ref(false)
 
 const formSchema = toTypedSchema(
     z.object({
-        name: z.string().min(2).max(50),
         room_name: z.string().min(2).max(50)
     })
 )
@@ -42,20 +42,21 @@ const form = useForm({
 
 const router = useRouter()
 const loading = ref(false)
+
 const onSubmit = form.handleSubmit(async (values) => {
     loading.value = true
     try {
-        const json = await createMeeting({
+        const res = await createMeeting({
             room_name: values.room_name
         })
+        if (!res.ok) {
+            errorToast(await getResMessage(res))
+            return
+        }
+        const json = await res.json()
         router.push(`/meeting/join?id=${json.room_id}`)
-    } catch (e) {
-        toast({
-            title: 'An error happened',
-            description: 'Please try again later.',
-            variant: 'destructive'
-        })
-        console.log(e)
+    } catch (e: any) {
+        errorToast(e.message)
     } finally {
         loading.value = false
         isOpen.value = false
@@ -81,31 +82,17 @@ const onSubmit = form.handleSubmit(async (values) => {
                         <FormControl>
                             <Input
                                 type="text"
-                                placeholder="Enter room name.."
+                                placeholder="Enter room name..."
                                 v-bind="componentField"
                             />
                         </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                </FormField>
-                <FormField v-slot="{ componentField }" name="name">
-                    <FormItem>
-                        <FormLabel>Your display name:</FormLabel>
-                        <FormControl>
-                            <Input
-                                type="text"
-                                placeholder="Enter your display name.."
-                                v-bind="componentField"
-                            />
-                        </FormControl>
-                        <FormDescription> Other people will see this as your name </FormDescription>
                         <FormMessage />
                     </FormItem>
                 </FormField>
             </form>
 
             <DialogFooter>
-                <Button @click="onSubmit" :disabled="!loading">
+                <Button @click="onSubmit" :disabled="loading">
                     <template v-if="loading">Creating...</template>
                     <template v-else>Create</template>
                 </Button>
