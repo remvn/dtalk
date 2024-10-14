@@ -1,3 +1,4 @@
+import { getAPIBaseURL } from '@/lib/config'
 import { useUserInfo } from '@/stores/user-store'
 
 export const defaultHeaders = {
@@ -12,17 +13,8 @@ export function getAuthHeader(headers = defaultHeaders) {
     }
 }
 
-export function getBaseURL() {
-    const mode = import.meta.env.MODE
-    if (mode === 'production') {
-        return ''
-    } else {
-        return 'http://localhost:8080'
-    }
-}
-
 export function getURL(url: string) {
-    const fullURL = new URL(url, getBaseURL()).href
+    const fullURL = new URL(url, getAPIBaseURL()).href
     return fullURL
 }
 

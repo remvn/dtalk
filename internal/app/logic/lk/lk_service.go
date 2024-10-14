@@ -48,22 +48,22 @@ type JoinTokenParams struct {
 
 func (service *Service) GetJoinToken(roomId string, params JoinTokenParams) (string, error) {
 	options := service.options
-	accessToken := auth.NewAccessToken(options.ApiKey, options.ApiSecret)
+	token := auth.NewAccessToken(options.ApiKey, options.ApiSecret)
 	grant := &auth.VideoGrant{
 		RoomJoin: true,
 		Room:     roomId,
 	}
 
-	accessToken.AddGrant(grant).
+	token.AddGrant(grant).
 		SetIdentity(params.UserID).
 		SetName(params.UserName).
 		SetValidFor(time.Hour)
 
-	token, err := accessToken.ToJWT()
+	tokenStr, err := token.ToJWT()
 	if err != nil {
 		return "", err
 	}
-	return token, nil
+	return tokenStr, nil
 }
 
 func (service *Service) createRoom() (*livekit.Room, error) {
