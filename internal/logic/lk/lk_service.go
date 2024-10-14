@@ -117,8 +117,8 @@ func (service *Service) SendData(roomID string, destinations []string, data any)
 	}
 	_, err = service.roomClient.SendData(context.Background(), &livekit.SendDataRequest{
 		Room:                  roomID,
-		DestinationIdentities: destinations,
 		Data:                  bytes,
+		DestinationIdentities: destinations,
 	})
 	if err != nil {
 		return err

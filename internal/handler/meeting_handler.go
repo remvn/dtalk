@@ -32,7 +32,8 @@ func NewMeetingHandler(
 func (handler *MeetingHandler) Register() {
 	protectedGroup := handler.echoServer.Group("meeting")
 	handler.authMiddleware.Apply(protectedGroup)
-	protectedGroup.POST("/join-request", handler.join)
+	protectedGroup.POST("/join", handler.join)
+	protectedGroup.POST("/accept", handler.accept)
 
 	group := handler.echoServer.Group("meeting")
 	group.POST("/create", handler.create)
@@ -61,7 +62,7 @@ func (handler *MeetingHandler) create(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &createMeetingRes{
-		RoomID: meeting.Data.GetRoomID(),
+		RoomID: meeting.Data.RoomID(),
 	})
 }
 
@@ -95,8 +96,8 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 	}
 
 	// room is just created, first one in will be the host
-	if meeting.Data.GetHostID() == "" {
-		token, err := handler.lkService.GetJoinToken(meeting.Data.GetRoomID(), lk.JoinTokenParams{
+	if meeting.Data.HostID() == "" {
+		token, err := handler.lkService.GetJoinToken(meeting.Data.RoomID(), lk.JoinTokenParams{
 			UserID: userInfo.ID,
 		})
 		if err != nil {
@@ -109,22 +110,23 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 		})
 	}
 
-	resChan, err := handler.lkService.SetupMeetingJoinRequest(userInfo, meeting.Data.GetRoomID())
+	resChan, err := handler.lkService.AddJoinRequest(userInfo, meeting.Data.RoomID())
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
+	_ = handler.lkService.SendPendingJoinRequestPacket(meeting.Data.RoomID())
 
 	accepted := false
 	select {
 	case accepted = <-resChan:
-	case <-time.After(2 * time.Minute):
-	case <-c.Request().Context().Done():
+	case <-time.After(2 * time.Minute): //  timeout
+	case <-c.Request().Context().Done(): // user cancel request
 	}
 
 	log.Println("result: ", accepted)
 
 	if accepted {
-		token, err := handler.lkService.GetJoinToken(meeting.Data.GetRoomID(), lk.JoinTokenParams{
+		token, err := handler.lkService.GetJoinToken(meeting.Data.RoomID(), lk.JoinTokenParams{
 			UserID: userInfo.ID,
 		})
 		if err != nil {
@@ -141,4 +143,44 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 			Message: "Your join request gets rejected",
 		})
 	}
+}
+
+type acceptRequestDto struct {
+	Accepted    bool   `json:"accepted"`
+	RoomID      string `json:"room_id"`
+	RequesterID string `json:"requester_id"`
+}
+
+func (handler *MeetingHandler) accept(c echo.Context) error {
+	dto := &acceptRequestDto{}
+	if err := c.Bind(dto); err != nil {
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	hostInfo, err := middleware.ExtractUserInfo(c)
+	if err != nil {
+		log.Println(err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	meeting, err := handler.lkService.GetMeeting(dto.RoomID)
+	if err != nil {
+		return c.NoContent(http.StatusNotFound)
+	}
+	if hostInfo.ID != meeting.Data.HostID() {
+		return c.NoContent(http.StatusUnauthorized)
+	}
+
+	request, ok := meeting.Data.GetJoinRequest(dto.RequesterID)
+	if !ok {
+		return c.NoContent(http.StatusNotFound)
+	}
+
+	select {
+	case request.ResultChan <- dto.Accepted:
+	default:
+	}
+	meeting.Data.RemoveJoinRequest(dto.RequesterID)
+
+	return c.NoContent(http.StatusOK)
 }

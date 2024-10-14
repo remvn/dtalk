@@ -15,13 +15,19 @@ type MeetingData struct {
 	joinRequestMap map[string]*meetingJoinRequest
 }
 
-func (data *MeetingData) GetRoomID() string {
+// this struct must be immutable
+type meetingJoinRequest struct {
+	UserInfo   *dtalk.UserTokenInfo
+	ResultChan chan bool
+}
+
+func (data *MeetingData) RoomID() string {
 	data.m.RLock()
 	defer data.m.RUnlock()
 	return data.roomID
 }
 
-func (data *MeetingData) GetHostID() string {
+func (data *MeetingData) HostID() string {
 	data.m.RLock()
 	defer data.m.RUnlock()
 	return data.hostID
@@ -36,7 +42,30 @@ func (data *MeetingData) SetHostID(hostID string) {
 func (data *MeetingData) AddJoinRequest(request *meetingJoinRequest) {
 	data.m.Lock()
 	defer data.m.Unlock()
-	data.joinRequestMap[request.userInfo.ID] = request
+	data.joinRequestMap[request.UserInfo.ID] = request
+}
+
+func (data *MeetingData) ListRequester() []*dtalk.UserTokenInfo {
+	data.m.RLock()
+	defer data.m.RUnlock()
+	arr := []*dtalk.UserTokenInfo{}
+	for _, request := range data.joinRequestMap {
+		arr = append(arr, request.UserInfo)
+	}
+	return arr
+}
+
+func (data *MeetingData) GetJoinRequest(requesterID string) (*meetingJoinRequest, bool) {
+	data.m.RLock()
+	defer data.m.RUnlock()
+	request, ok := data.joinRequestMap[requesterID]
+	return request, ok
+}
+
+func (data *MeetingData) RemoveJoinRequest(requesterID string) {
+	data.m.Lock()
+	defer data.m.Unlock()
+	delete(data.joinRequestMap, requesterID)
 }
 
 func NewMeetingData(roomID, hostID string) *MeetingData {
@@ -81,18 +110,13 @@ func (service *Service) CreateMeeting(params CreateMeetingParams) (*Meeting, err
 		Data: NewMeetingData(room.Name, ""),
 		Room: room,
 	}
-	service.meetingMap.Set(meeting.Data.GetRoomID(), meeting.Data)
+	service.meetingMap.Set(meeting.Data.RoomID(), meeting.Data)
 	return meeting, nil
-}
-
-type meetingJoinRequest struct {
-	userInfo *dtalk.UserTokenInfo
-	result   chan bool
 }
 
 var ErrRoomNotReady = errors.New("This room is not ready")
 
-func (service *Service) SetupMeetingJoinRequest(
+func (service *Service) AddJoinRequest(
 	requester *dtalk.UserTokenInfo,
 	roomID string,
 ) (<-chan bool, error) {
@@ -100,16 +124,34 @@ func (service *Service) SetupMeetingJoinRequest(
 	if err != nil {
 		return nil, err
 	}
-	if meeting.Data.GetHostID() == "" {
+	if meeting.Data.HostID() == "" {
 		return nil, ErrRoomNotReady
 	}
 
 	// handle join request
 	request := &meetingJoinRequest{
-		userInfo: requester,
-		result:   make(chan bool),
+		UserInfo:   requester,
+		ResultChan: make(chan bool),
 	}
 	meeting.Data.AddJoinRequest(request)
 
-	return request.result, nil
+	return request.ResultChan, nil
+}
+
+func (service *Service) SendPendingJoinRequestPacket(roomID string) error {
+	meeting, err := service.GetMeeting(roomID)
+	if err != nil {
+		return err
+	}
+	if meeting.Data.HostID() == "" {
+		return ErrRoomNotReady
+	}
+
+	pendingCount := len(meeting.Data.ListRequester())
+	err = service.SendData(
+		roomID,
+		[]string{meeting.Data.HostID()},
+		NewPendingJoinRequestPacket(pendingCount),
+	)
+	return err
 }
