@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	UserClaimsContextKey = "user_claims"
-	UserInfoContextKey   = "user_info"
+	UserTokenContextKey = "user_claims"
+	UserInfoContextKey  = "user_info"
 )
 
 type consumer interface {

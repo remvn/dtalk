@@ -12,6 +12,7 @@ import (
 )
 
 type appConfig struct {
+	AppEnv            string `env:"APP_ENV"`
 	Port              int    `env:"PORT" envDefault:"8080"`
 	AccessTokenSecret string `env:"ACCESS_TOKEN_SECRET,required"`
 	LiveKitHostURL    string `env:"LIVEKIT_HOST_URL,required"`
@@ -27,20 +28,26 @@ func main() {
 		log.Fatal(err)
 	}
 
-	info := lk.Config{
+	lkConf := lk.Config{
 		HostURL:   appConfig.LiveKitHostURL,
 		ApiKey:    appConfig.LiveKitAPIKey,
 		ApiSecret: appConfig.LiveKitAPISecret,
 	}
 
-	config := handler.ServerConfig{
+	cors := []string{}
+	if appConfig.AppEnv == "local" {
+		cors = []string{"*"}
+	}
+
+	serverConf := handler.ServerConfig{
 		AuthTokenConfig: config.JwtTokenConfig{
 			Name:     "access_token",
 			Secret:   []byte(appConfig.AccessTokenSecret),
 			Duration: time.Hour * 24 * 10,
 		},
+		CORS: cors,
 	}
-	server := handler.NewServer(config, info)
+	server := handler.NewServer(serverConf, lkConf)
 
 	server.Start(appConfig.Port)
 }

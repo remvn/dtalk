@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/labstack/echo/v4"
+	echoMW "github.com/labstack/echo/v4/middleware"
 )
 
 type Server struct {
@@ -17,10 +18,17 @@ type Server struct {
 
 type ServerConfig struct {
 	AuthTokenConfig config.JwtTokenConfig
+	CORS            []string
 }
 
 func NewServer(config ServerConfig, lkConfig lk.Config) *Server {
 	echoServer := echo.New()
+	if len(config.CORS) > 0 {
+		echoServer.Use(echoMW.CORSWithConfig(echoMW.CORSConfig{
+			AllowOrigins: config.CORS,
+		}))
+	}
+
 	lkService := lk.NewLkService(lkConfig)
 
 	server := &Server{
@@ -28,6 +36,7 @@ func NewServer(config ServerConfig, lkConfig lk.Config) *Server {
 		LkService:  lkService,
 	}
 
+	parentGroup := echoServer.Group("/api")
 	authMiddleware := middleware.NewAuthMiddleware(config.AuthTokenConfig)
 
 	authHandler := NewAuthHandler(
@@ -35,14 +44,14 @@ func NewServer(config ServerConfig, lkConfig lk.Config) *Server {
 		echoServer,
 		authMiddleware,
 	)
-	authHandler.Register()
+	authHandler.Register(parentGroup)
 
 	meetingHandler := NewMeetingHandler(
 		echoServer,
 		lkService,
 		authMiddleware,
 	)
-	meetingHandler.Register()
+	meetingHandler.Register(parentGroup)
 
 	return server
 }

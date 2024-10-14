@@ -29,20 +29,25 @@ func (m *AuthMiddleware) Apply(consumer consumer) {
 
 func (m *AuthMiddleware) validate() echo.MiddlewareFunc {
 	return echojwt.WithConfig(echojwt.Config{
-		ContextKey:  UserClaimsContextKey,
+		ContextKey:  UserTokenContextKey,
 		SigningKey:  m.tokenConfig.Secret,
 		TokenLookup: fmt.Sprintf("header:Authorization:Bearer ,cookie:%s", m.tokenConfig.Name),
 	})
 }
 
-var ErrUnableToExtract = errors.New("unable to extract user claims from context")
+var ErrUnableToExtract = errors.New("unable to extract data from context")
 
 func (m *AuthMiddleware) extract() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			claims, ok := c.Get(UserClaimsContextKey).(jwt.MapClaims)
+			token, ok := c.Get(UserTokenContextKey).(*jwt.Token)
 			if !ok {
-				log.Println(ErrUnableToExtract)
+				log.Println(fmt.Errorf("unable to assert *jwt.Token: %w", ErrUnableToExtract))
+				return c.NoContent(http.StatusInternalServerError)
+			}
+			claims, ok := token.Claims.(jwt.MapClaims)
+			if !ok {
+				log.Println(fmt.Errorf("unable to assert jwt.MapClaims: %w", ErrUnableToExtract))
 				return c.NoContent(http.StatusInternalServerError)
 			}
 

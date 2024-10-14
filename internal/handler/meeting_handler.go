@@ -29,13 +29,13 @@ func NewMeetingHandler(
 	return handler
 }
 
-func (handler *MeetingHandler) Register() {
-	protectedGroup := handler.echoServer.Group("meeting")
+func (handler *MeetingHandler) Register(parentGroup *echo.Group) {
+	protectedGroup := parentGroup.Group("/meeting")
 	handler.authMiddleware.Apply(protectedGroup)
 	protectedGroup.POST("/join", handler.join)
 	protectedGroup.POST("/accept", handler.accept)
 
-	group := handler.echoServer.Group("meeting")
+	group := parentGroup.Group("/meeting")
 	group.POST("/create", handler.create)
 }
 

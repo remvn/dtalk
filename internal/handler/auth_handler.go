@@ -30,14 +30,17 @@ func NewAuthHandler(
 	return handler
 }
 
-func (handler *AuthHandler) Register() {
-	group := handler.echoServer.Group("auth")
-	handler.authMiddleware.Apply(group)
+func (handler *AuthHandler) Register(parentGroup *echo.Group) {
+	group := parentGroup.Group("/auth")
 	group.POST("/request-token", handler.requestToken)
 }
 
 type requestTokenDto struct {
 	Name string `json:"name"`
+}
+
+type requestTokenRes struct {
+	AccessToken string `json:"access_token"`
 }
 
 func (handler *AuthHandler) requestToken(c echo.Context) error {
@@ -56,12 +59,14 @@ func (handler *AuthHandler) requestToken(c echo.Context) error {
 		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	c.SetCookie(&http.Cookie{
-		Name:     handler.tokenConfig.Name,
-		Value:    tokenStr,
-		HttpOnly: true,
-		Expires:  handler.tokenConfig.GetExpire(),
-	})
+	// c.SetCookie(&http.Cookie{
+	// 	Name:     handler.tokenConfig.Name,
+	// 	Value:    tokenStr,
+	// 	HttpOnly: true,
+	// 	Expires:  handler.tokenConfig.GetExpire(),
+	// })
 
-	return c.NoContent(http.StatusOK)
+	return c.JSON(http.StatusOK, requestTokenRes{
+		AccessToken: tokenStr,
+	})
 }

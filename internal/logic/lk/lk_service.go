@@ -35,6 +35,7 @@ func NewLkService(options Config) *Service {
 	service := &Service{
 		roomClient: roomClient,
 		options:    options,
+		meetingMap: cmap.New[string, *MeetingData](),
 	}
 
 	return service
