@@ -1,9 +1,9 @@
 package main
 
 import (
+	"dtalk/internal/adapter/rest/handler"
+	"dtalk/internal/app/logic/lk"
 	"dtalk/internal/config"
-	"dtalk/internal/handler"
-	"dtalk/internal/logic/lk"
 	"log"
 	"time"
 

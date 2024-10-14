@@ -1,8 +1,8 @@
 package handler
 
 import (
+	"dtalk/internal/adapter/rest/middleware"
 	"dtalk/internal/config"
-	"dtalk/internal/middleware"
 	"dtalk/internal/pkg/random"
 	"log"
 	"net/http"

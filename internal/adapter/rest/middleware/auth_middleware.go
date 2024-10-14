@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"dtalk/internal/app/dtalk"
 	"dtalk/internal/config"
-	"dtalk/internal/dtalk"
 	"errors"
 	"fmt"
 	"log"

@@ -1,7 +1,7 @@
 package lk
 
 import (
-	"dtalk/internal/dtalk"
+	"dtalk/internal/app/dtalk"
 	"errors"
 	"sync"
 

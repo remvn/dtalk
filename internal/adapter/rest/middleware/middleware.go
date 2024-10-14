@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"dtalk/internal/dtalk"
+	"dtalk/internal/app/dtalk"
 	"errors"
 
 	"github.com/labstack/echo/v4"

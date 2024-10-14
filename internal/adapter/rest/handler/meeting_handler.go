@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"dtalk/internal/logic/lk"
-	"dtalk/internal/middleware"
+	"dtalk/internal/adapter/rest/middleware"
+	"dtalk/internal/app/logic/lk"
 	"log"
 	"net/http"
 	"time"
