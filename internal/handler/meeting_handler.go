@@ -61,7 +61,7 @@ func (handler *MeetingHandler) create(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, &createMeetingRes{
-		RoomID: meeting.Data.RoomID,
+		RoomID: meeting.Data.GetRoomID(),
 	})
 }
 
@@ -95,21 +95,21 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 	}
 
 	// room is just created, first one in will be the host
-	if meeting.Data.HostID == "" {
-		token, err := handler.lkService.GetJoinToken(meeting.Data.RoomID, lk.JoinTokenParams{
+	if meeting.Data.GetHostID() == "" {
+		token, err := handler.lkService.GetJoinToken(meeting.Data.GetRoomID(), lk.JoinTokenParams{
 			UserID: userInfo.ID,
 		})
 		if err != nil {
 			return c.NoContent(http.StatusInternalServerError)
 		}
-		meeting.Data.HostID = userInfo.ID
+		meeting.Data.SetHostID(userInfo.ID)
 		return c.JSON(http.StatusOK, joinMeetingRes{
 			OK:          true,
 			AccessToken: token,
 		})
 	}
 
-	resChan, err := handler.lkService.SetupMeetingJoinRequest(userInfo, meeting.Data.RoomID)
+	resChan, err := handler.lkService.SetupMeetingJoinRequest(userInfo, meeting.Data.GetRoomID())
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
@@ -124,7 +124,7 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 	log.Println("result: ", accepted)
 
 	if accepted {
-		token, err := handler.lkService.GetJoinToken(meeting.Data.RoomID, lk.JoinTokenParams{
+		token, err := handler.lkService.GetJoinToken(meeting.Data.GetRoomID(), lk.JoinTokenParams{
 			UserID: userInfo.ID,
 		})
 		if err != nil {

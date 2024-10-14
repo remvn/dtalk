@@ -2,23 +2,48 @@ package lk
 
 import (
 	"dtalk/internal/dtalk"
-	"dtalk/internal/pkg/cmap"
 	"errors"
+	"sync"
 
 	"github.com/livekit/protocol/livekit"
 )
 
 type MeetingData struct {
-	RoomID         string
-	HostID         string
-	JoinRequestMap *cmap.CMap[string, *meetingJoinRequest]
+	m              sync.RWMutex
+	roomID         string
+	hostID         string
+	joinRequestMap map[string]*meetingJoinRequest
+}
+
+func (data *MeetingData) GetRoomID() string {
+	data.m.RLock()
+	defer data.m.RUnlock()
+	return data.roomID
+}
+
+func (data *MeetingData) GetHostID() string {
+	data.m.RLock()
+	defer data.m.RUnlock()
+	return data.hostID
+}
+
+func (data *MeetingData) SetHostID(hostID string) {
+	data.m.Lock()
+	defer data.m.Unlock()
+	data.hostID = hostID
+}
+
+func (data *MeetingData) AddJoinRequest(request *meetingJoinRequest) {
+	data.m.Lock()
+	defer data.m.Unlock()
+	data.joinRequestMap[request.userInfo.ID] = request
 }
 
 func NewMeetingData(roomID, hostID string) *MeetingData {
 	return &MeetingData{
-		RoomID:         roomID,
-		HostID:         hostID,
-		JoinRequestMap: cmap.New[string, *meetingJoinRequest](),
+		roomID:         roomID,
+		hostID:         hostID,
+		joinRequestMap: make(map[string]*meetingJoinRequest),
 	}
 }
 
@@ -56,13 +81,13 @@ func (service *Service) CreateMeeting(params CreateMeetingParams) (*Meeting, err
 		Data: NewMeetingData(room.Name, ""),
 		Room: room,
 	}
-	service.meetingMap.Set(meeting.Data.RoomID, meeting.Data)
+	service.meetingMap.Set(meeting.Data.GetRoomID(), meeting.Data)
 	return meeting, nil
 }
 
 type meetingJoinRequest struct {
 	userInfo *dtalk.UserTokenInfo
-	result   chan<- bool
+	result   chan bool
 }
 
 var ErrRoomNotReady = errors.New("This room is not ready")
@@ -75,13 +100,16 @@ func (service *Service) SetupMeetingJoinRequest(
 	if err != nil {
 		return nil, err
 	}
-	if meeting.Data.HostID == "" {
+	if meeting.Data.GetHostID() == "" {
 		return nil, ErrRoomNotReady
 	}
+
+	// handle join request
 	request := &meetingJoinRequest{
 		userInfo: requester,
 		result:   make(chan bool),
 	}
-	meeting.Data.JoinRequestMap.Set(requester.ID, request)
-	return nil, nil
+	meeting.Data.AddJoinRequest(request)
+
+	return request.result, nil
 }
