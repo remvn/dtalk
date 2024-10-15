@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { getLkServerURL } from '@/lib/config'
-import { Meeting, type MeetingRender, type MeetingRenderMap } from '@/services/meeting-service'
+import { Meeting, type MeetingRenderMap } from '@/services/meeting-service'
 import { useMeetingData } from '@/stores/meeting-store'
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import { breakpointsTailwind, useBreakpoints, useThrottleFn } from '@vueuse/core'
-import HeroiconsVideoCamera from '~icons/heroicons/video-camera'
-import HeroiconsMicrophone from '~icons/heroicons/microphone'
 import MdiPhoneHangup from '~icons/mdi/phone-hangup'
 import { Button } from '@/components/ui/button'
+import MediaToggleButton from '@/components/MediaToggleButton.vue'
+import MdiMicrophoneOff from '~icons/mdi/microphone-off'
+import MdiMicrophoneOutline from '~icons/mdi/microphone-outline'
+import MdiCameraOff from '~icons/mdi/camera-off'
+import MdiCameraOutline from '~icons/mdi/camera-outline'
 
 const meetingData = useMeetingData()
 const renderMap = shallowRef<MeetingRenderMap>(new Map())
@@ -98,22 +101,22 @@ onBeforeUnmount(() => {
             <div class="row-span-1 flex justify-between items-center px-6 py-4">
                 <span class="text-lg">{{ meetingData.data.roomName }}</span>
                 <div class="flex gap-3">
-                    <Button
-                        @click="handleMicroToggle"
-                        size="icon"
-                        class="size-12 rounded-full"
-                        :variant="isMicroEnabled ? 'destructive' : 'secondary'"
-                    >
-                        <HeroiconsMicrophone class="size-6"></HeroiconsMicrophone>
-                    </Button>
-                    <Button
-                        @click="handleCameraToggle"
-                        size="icon"
-                        class="size-12 rounded-full"
-                        :variant="isCameraEnabled ? 'destructive' : 'secondary'"
-                    >
-                        <HeroiconsVideoCamera class="size-6"></HeroiconsVideoCamera>
-                    </Button>
+                    <MediaToggleButton @toggle="handleMicroToggle" :is-enabled="isMicroEnabled">
+                        <template #disabled>
+                            <MdiMicrophoneOutline class="size-6"></MdiMicrophoneOutline>
+                        </template>
+                        <template #enabled>
+                            <MdiMicrophoneOff class="size-6"></MdiMicrophoneOff>
+                        </template>
+                    </MediaToggleButton>
+                    <MediaToggleButton @toggle="handleCameraToggle" :is-enabled="isCameraEnabled">
+                        <template #disabled>
+                            <MdiCameraOutline class="size-6"></MdiCameraOutline>
+                        </template>
+                        <template #enabled>
+                            <MdiCameraOff class="size-6"></MdiCameraOff>
+                        </template>
+                    </MediaToggleButton>
                     <Button
                         @click="handleDisconnect"
                         size="icon"
