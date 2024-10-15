@@ -12,18 +12,18 @@ import {
 } from 'livekit-client'
 import { triggerRef, type ShallowRef } from 'vue'
 
+export type MeetingRenderMap = Map<string, MeetingRender>
+
 export type MeetingRender = {
     participantID: string
-    videoElement?: {
-        srcObject: MediaProvider | null
-    }
-    audioElement?: HTMLAudioElement
+    videoSrc?: MediaStream
+    audioSrc?: MediaStream
 }
 
 type MeetingParams = {
     url: string
     token: string
-    renderArr: ShallowRef<MeetingRender[], MeetingRender[]>
+    renderMap: ShallowRef<MeetingRenderMap, MeetingRenderMap>
     setGridSize: (numParticipants: number) => void
 }
 
@@ -31,7 +31,7 @@ export class Meeting {
     room: Room
     url: string
     token: string
-    renderArr: ShallowRef<MeetingRender[], MeetingRender[]>
+    renderMap: ShallowRef<MeetingRenderMap, MeetingRenderMap>
     setGridSize: (numParticipants: number) => void
 
     constructor(params: MeetingParams) {
@@ -47,7 +47,7 @@ export class Meeting {
                 resolution: VideoPresets.h720.resolution
             }
         })
-        this.renderArr = params.renderArr
+        this.renderMap = params.renderMap
         this.url = params.url
         this.token = params.token
         this.setGridSize = params.setGridSize
@@ -71,39 +71,18 @@ export class Meeting {
             .on(RoomEvent.Disconnected, this.handleDisconnect.bind(this))
     }
 
-    getRender(id: string): MeetingRender | null {
-        for (const item of this.renderArr.value) {
-            if (item.participantID === id) {
-                return item
-            }
-        }
-        return null
-    }
-
     handleLocalTrackPublished(pub: LocalTrackPublication, participant: LocalParticipant) {
         const track = pub.track
-        console.log('handleLocalTrackPublished', track?.kind)
         if (pub.kind !== Track.Kind.Video) return
         if (track == null || track.mediaStream == null) return
 
-        const arr = this.renderArr.value
-        let render = this.getRender(participant.identity)
-        if (render == null) {
-            render = {
-                participantID: participant.identity,
-                videoElement: {
-                    srcObject: track.mediaStream
-                }
-            }
-            arr.push(render)
-        } else {
-            render.videoElement = {
-                srcObject: track.mediaStream
-            }
-        }
-        this.renderArr.value = arr
-        this.setGridSize(this.room.numParticipants)
-        triggerRef(this.renderArr)
+        this.rerenderGrid()
+    }
+
+    handleLocalTrackUnpublished(pub: LocalTrackPublication, participant: LocalParticipant) {
+        // when local tracks are ended, update UI to remove them from rendering
+        pub.track?.detach()
+        this.rerenderGrid()
     }
 
     handleTrackSubscribed(
@@ -111,11 +90,7 @@ export class Meeting {
         pub: RemoteTrackPublication,
         participant: RemoteParticipant
     ) {
-        console.log(`called`)
-        if (track.kind === Track.Kind.Video || track.kind === Track.Kind.Audio) {
-            // attach it to a new HTMLVideoElement or HTMLAudioElement
-            const element = track.attach()
-        }
+        this.rerenderGrid()
     }
 
     handleTrackUnsubscribed(
@@ -125,11 +100,7 @@ export class Meeting {
     ) {
         // remove tracks from all attached elements
         track.detach()
-    }
-
-    handleLocalTrackUnpublished(publication: LocalTrackPublication, participant: LocalParticipant) {
-        // when local tracks are ended, update UI to remove them from rendering
-        publication.track?.detach()
+        this.rerenderGrid()
     }
 
     handleActiveSpeakerChange(speakers: Participant[]) {
@@ -138,5 +109,39 @@ export class Meeting {
 
     handleDisconnect() {
         console.log('disconnected from room')
+    }
+
+    updateRenderMap() {
+        const map: MeetingRenderMap = new Map()
+        const localParticipant = this.room.localParticipant
+        map.set(localParticipant.identity, {
+            videoSrc: this.getVideoStream(localParticipant),
+            participantID: localParticipant.identity
+        })
+        for (const [key, value] of this.room.remoteParticipants) {
+            map.set(key, {
+                participantID: key,
+                videoSrc: this.getVideoStream(value),
+                audioSrc: this.getAudioStream(value)
+            })
+        }
+        console.log(map)
+        this.renderMap.value = map
+    }
+
+    getVideoStream(participant: Participant): MediaStream | undefined {
+        if (!participant.isCameraEnabled) return undefined
+        return participant.getTrackPublication(Track.Source.Camera)?.videoTrack?.mediaStream
+    }
+
+    getAudioStream(participant: Participant): MediaStream | undefined {
+        if (!participant.isMicrophoneEnabled) return undefined
+        return participant.getTrackPublication(Track.Source.Microphone)?.audioTrack?.mediaStream
+    }
+
+    rerenderGrid() {
+        this.updateRenderMap()
+        this.setGridSize(this.renderMap.value.size)
+        triggerRef(this.renderMap)
     }
 }

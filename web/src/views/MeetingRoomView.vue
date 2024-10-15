@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getLkServerURL } from '@/lib/config'
-import { Meeting, type MeetingRender } from '@/services/meeting-service'
+import { Meeting, type MeetingRender, type MeetingRenderMap } from '@/services/meeting-service'
 import { useMeetingData } from '@/stores/meeting-store'
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import { breakpointsTailwind, useBreakpoints, useThrottleFn } from '@vueuse/core'
@@ -10,12 +10,12 @@ import MdiPhoneHangup from '~icons/mdi/phone-hangup'
 import { Button } from '@/components/ui/button'
 
 const meetingData = useMeetingData()
-const renderArr = shallowRef<MeetingRender[]>([])
+const renderMap = shallowRef<MeetingRenderMap>(new Map())
 
 const meeting = new Meeting({
     token: meetingData.data.token,
     url: getLkServerURL(),
-    renderArr: renderArr,
+    renderMap: renderMap,
     setGridSize: setGridSize
 })
 
@@ -47,13 +47,25 @@ function setGridSize(numParticipants: number) {
 const isCameraEnabled = ref(false)
 async function handleCameraToggle() {
     const participant = meeting.room.localParticipant
-    await participant.setCameraEnabled(participant.isCameraEnabled)
+    await participant.setCameraEnabled(!participant.isCameraEnabled)
     isCameraEnabled.value = participant.isCameraEnabled
+    meeting.rerenderGrid()
 }
+
+const isMicroEnabled = ref(false)
+async function handleMicroToggle() {
+    const participant = meeting.room.localParticipant
+    await participant.setMicrophoneEnabled(!participant.isMicrophoneEnabled)
+    isMicroEnabled.value = participant.isMicrophoneEnabled
+}
+
+async function handleDisconnect() {}
 
 onMounted(async () => {
     meeting.setListener()
     await meeting.connect()
+
+    meeting.rerenderGrid()
 
     window.addEventListener('resize', handleWindowResize)
 })
@@ -70,13 +82,13 @@ onBeforeUnmount(() => {
                 <div class="flex-grow h-full grid video-grid">
                     <div
                         class="video-container"
-                        v-for="item in renderArr"
+                        v-for="item in renderMap.values()"
                         :key="item.participantID"
                     >
                         <video
-                            v-if="item.videoElement != null"
+                            v-if="item.videoSrc != null"
                             class="video"
-                            :srcObject.prop="item.videoElement.srcObject"
+                            :srcObject.prop="item.videoSrc"
                             autoplay
                         ></video>
                     </div>
@@ -86,13 +98,28 @@ onBeforeUnmount(() => {
             <div class="row-span-1 flex justify-between items-center px-6 py-4">
                 <span class="text-lg">{{ meetingData.data.roomName }}</span>
                 <div class="flex gap-3">
-                    <Button size="icon" class="size-12 rounded-full" variant="secondary">
+                    <Button
+                        @click="handleMicroToggle"
+                        size="icon"
+                        class="size-12 rounded-full"
+                        :variant="isMicroEnabled ? 'destructive' : 'secondary'"
+                    >
                         <HeroiconsMicrophone class="size-6"></HeroiconsMicrophone>
                     </Button>
-                    <Button size="icon" class="size-12 rounded-full" variant="secondary">
+                    <Button
+                        @click="handleCameraToggle"
+                        size="icon"
+                        class="size-12 rounded-full"
+                        :variant="isCameraEnabled ? 'destructive' : 'secondary'"
+                    >
                         <HeroiconsVideoCamera class="size-6"></HeroiconsVideoCamera>
                     </Button>
-                    <Button size="icon" class="h-12 w-20 rounded-full" variant="destructive">
+                    <Button
+                        @click="handleDisconnect"
+                        size="icon"
+                        class="h-12 w-20 rounded-full"
+                        variant="destructive"
+                    >
                         <MdiPhoneHangup class="size-6"></MdiPhoneHangup>
                     </Button>
                 </div>
