@@ -24,6 +24,7 @@ type MeetingParams = {
     url: string
     token: string
     renderArr: ShallowRef<MeetingRender[], MeetingRender[]>
+    setGridSize: (numParticipants: number) => void
 }
 
 export class Meeting {
@@ -31,6 +32,7 @@ export class Meeting {
     url: string
     token: string
     renderArr: ShallowRef<MeetingRender[], MeetingRender[]>
+    setGridSize: (numParticipants: number) => void
 
     constructor(params: MeetingParams) {
         this.room = new Room({
@@ -48,6 +50,7 @@ export class Meeting {
         this.renderArr = params.renderArr
         this.url = params.url
         this.token = params.token
+        this.setGridSize = params.setGridSize
     }
 
     async connect() {
@@ -99,6 +102,7 @@ export class Meeting {
             }
         }
         this.renderArr.value = arr
+        this.setGridSize(this.room.numParticipants)
         triggerRef(this.renderArr)
     }
 
