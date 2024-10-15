@@ -23,10 +23,10 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { useForm } from 'vee-validate'
-import { createMeeting } from '@/services/user-service'
+import { createMeeting } from '@/logic/user-service'
 import { useRouter } from 'vue-router'
-import { getResMessage } from '@/services/fetching'
-import { errorToast } from '@/services/toast'
+import { getResMessage } from '@/logic/fetching'
+import { errorToast } from '@/logic/toast'
 
 const isOpen = ref(false)
 

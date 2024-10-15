@@ -14,12 +14,12 @@ import {
     FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { joinMeeting, requestToken } from '@/services/user-service'
+import { joinMeeting, requestToken } from '@/logic/user-service'
 import { useUserInfo } from '@/stores/user-store'
 import { ref } from 'vue'
 import { useMeetingData } from '@/stores/meeting-store'
 import { useRouter } from 'vue-router'
-import { getJSON, getResMessage } from '@/services/fetching'
+import { getJSON, getResMessage } from '@/logic/fetching'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import { ReloadIcon } from '@radix-icons/vue'
 

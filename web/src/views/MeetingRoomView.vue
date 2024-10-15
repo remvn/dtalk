@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { getLkServerURL } from '@/lib/config'
-import { Meeting, type MeetingRenderMap } from '@/services/meeting-service'
+import { Meeting, type MeetingRenderMap } from '@/logic/meeting-service'
 import { useMeetingData } from '@/stores/meeting-store'
 import { onBeforeUnmount, onMounted, provide, ref, shallowRef } from 'vue'
 import { breakpointsTailwind, useBreakpoints, useThrottleFn } from '@vueuse/core'
