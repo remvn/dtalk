@@ -4,6 +4,10 @@ import { Meeting, type MeetingRender } from '@/services/meeting-service'
 import { useMeetingData } from '@/stores/meeting-store'
 import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import { breakpointsTailwind, useBreakpoints, useThrottleFn } from '@vueuse/core'
+import HeroiconsVideoCamera from '~icons/heroicons/video-camera'
+import HeroiconsMicrophone from '~icons/heroicons/microphone'
+import MdiPhoneHangup from '~icons/mdi/phone-hangup'
+import { Button } from '@/components/ui/button'
 
 const meetingData = useMeetingData()
 const renderArr = shallowRef<MeetingRender[]>([])
@@ -40,14 +44,16 @@ function setGridSize(numParticipants: number) {
     }
 }
 
+const isCameraEnabled = ref(false)
+async function handleCameraToggle() {
+    const participant = meeting.room.localParticipant
+    await participant.setCameraEnabled(participant.isCameraEnabled)
+    isCameraEnabled.value = participant.isCameraEnabled
+}
+
 onMounted(async () => {
     meeting.setListener()
     await meeting.connect()
-    const p = meeting.room.localParticipant
-    // turn on the local user's camera and mic, this may trigger a browser prompt
-    // to ensure permissions are granted
-    await p.setCameraEnabled(true)
-    await p.setMicrophoneEnabled(true)
 
     window.addEventListener('resize', handleWindowResize)
 })
@@ -77,8 +83,20 @@ onBeforeUnmount(() => {
                 </div>
                 <div class="w-[300px]"></div>
             </div>
-            <div class="row-span-1 flex justify-center items-center">
-                <span class="text-lg">TODO Tools Bar</span>
+            <div class="row-span-1 flex justify-between items-center px-6 py-4">
+                <span class="text-lg">{{ meetingData.data.roomName }}</span>
+                <div class="flex gap-3">
+                    <Button size="icon" class="size-12 rounded-full" variant="secondary">
+                        <HeroiconsMicrophone class="size-6"></HeroiconsMicrophone>
+                    </Button>
+                    <Button size="icon" class="size-12 rounded-full" variant="secondary">
+                        <HeroiconsVideoCamera class="size-6"></HeroiconsVideoCamera>
+                    </Button>
+                    <Button size="icon" class="h-12 w-20 rounded-full" variant="destructive">
+                        <MdiPhoneHangup class="size-6"></MdiPhoneHangup>
+                    </Button>
+                </div>
+                <span class="text-lg">Settings</span>
             </div>
         </div>
     </div>

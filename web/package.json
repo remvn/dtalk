@@ -29,10 +29,13 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@iconify-json/heroicons": "^1.2.1",
+    "@iconify-json/mdi": "^1.2.1",
     "@rushstack/eslint-patch": "^1.8.0",
     "@tsconfig/node20": "^20.1.4",
     "@types/node": "^20.14.5",
     "@vitejs/plugin-vue": "^5.0.5",
+    "@vue/compiler-sfc": "^3.5.12",
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/tsconfig": "^0.5.1",
@@ -43,6 +46,7 @@
     "prettier": "^3.2.5",
     "tailwindcss": "^3.4.13",
     "typescript": "~5.4.0",
+    "unplugin-icons": "^0.19.3",
     "vite": "^5.3.1",
     "vue-tsc": "^2.0.21"
   }

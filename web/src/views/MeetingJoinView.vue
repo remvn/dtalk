@@ -55,8 +55,11 @@ const onSubmit = form.handleSubmit(async (values) => {
             return
         }
         json = await res.json()
-        meetingData.data.token = json.access_token
-        meetingData.data.roomId = props.room_id!
+        meetingData.data = {
+            roomName: json.room_name,
+            token: json.access_token,
+            roomId: props.room_id!
+        }
         router.push('/meeting/room')
     } catch (e: any) {
         console.log(e)
