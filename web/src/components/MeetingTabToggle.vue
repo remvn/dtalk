@@ -17,7 +17,7 @@ function handleToggle() {
         @click="handleToggle"
         size="icon"
         class="size-12 rounded-full"
-        :variant="props.isEnabled ? 'destructive' : 'secondary'"
+        :variant="props.isEnabled ? 'outline' : 'ghost'"
     >
         <slot name="enabled" v-if="props.isEnabled"></slot>
         <slot name="disabled" v-if="!props.isEnabled"></slot>

@@ -2,7 +2,7 @@
 import { getLkServerURL } from '@/lib/config'
 import { Meeting, type MeetingRenderMap } from '@/services/meeting-service'
 import { useMeetingData } from '@/stores/meeting-store'
-import { onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
+import { onBeforeUnmount, onMounted, provide, ref, shallowRef } from 'vue'
 import { breakpointsTailwind, useBreakpoints, useThrottleFn } from '@vueuse/core'
 import MdiPhoneHangup from '~icons/mdi/phone-hangup'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,8 @@ import MdiMicrophoneOff from '~icons/mdi/microphone-off'
 import MdiMicrophoneOutline from '~icons/mdi/microphone-outline'
 import MdiCameraOff from '~icons/mdi/camera-off'
 import MdiCameraOutline from '~icons/mdi/camera-outline'
+import MeetingTab from '@/components/MeetingTab.vue'
+import { type MeetingTabState, MeetingTabStateKey } from '@/types/meeting'
 
 const meetingData = useMeetingData()
 const renderMap = shallowRef<MeetingRenderMap>(new Map())
@@ -64,6 +66,13 @@ async function handleMicroToggle() {
 
 async function handleDisconnect() {}
 
+const tabState = ref<MeetingTabState>({
+    isDrawerOpen: false,
+    isDialogOpen: false,
+    selectedTab: 'participant'
+})
+provide(MeetingTabStateKey, tabState)
+
 onMounted(async () => {
     meeting.setListener()
     await meeting.connect()
@@ -94,9 +103,16 @@ onBeforeUnmount(() => {
                             :srcObject.prop="item.videoSrc"
                             autoplay
                         ></video>
+                        <audio
+                            v-if="item.audioSrc != null"
+                            :srcObject.prop="item.audioSrc"
+                            autoplay
+                        ></audio>
                     </div>
                 </div>
-                <div class="w-[300px]"></div>
+                <div v-if="tabState.isDrawerOpen" class="w-[400px]">
+                    <MeetingTab v-model="tabState.selectedTab"></MeetingTab>
+                </div>
             </div>
             <div class="row-span-1 flex justify-between items-center px-6 py-4">
                 <span class="text-lg">{{ meetingData.data.roomName }}</span>
