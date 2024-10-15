@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { getLkServerURL } from '@/lib/config'
-import { Meeting } from '@/services/meeting-service'
+import { Meeting, type MeetingRender } from '@/services/meeting-service'
 import { useMeetingData } from '@/stores/meeting-store'
-import { onMounted, useTemplateRef } from 'vue'
+import { onMounted, shallowRef } from 'vue'
 
 const meetingData = useMeetingData()
+const renderArr = shallowRef<MeetingRender[]>([])
 
 const meeting = new Meeting({
     token: meetingData.data.token,
-    url: getLkServerURL()
+    url: getLkServerURL(),
+    renderArr: renderArr
 })
-const videoContainer = useTemplateRef('video-container')
 
 onMounted(async () => {
-    meeting.container = videoContainer.value
     meeting.setListener()
     await meeting.connect()
     const p = meeting.room.localParticipant
@@ -26,6 +26,28 @@ onMounted(async () => {
 
 <template>
     <div class="flex-grow">
-        <div ref="video-container"></div>
+        <div>
+            <div class="circle bg-black" v-for="item in renderArr" :key="item.participantID">
+                <!-- {{ item.participantID }} -->
+                <video
+                    v-if="item.videoElement != null"
+                    class="video rounded-full"
+                    :srcObject.prop="item.videoElement.srcObject"
+                    autoplay
+                ></video>
+            </div>
+        </div>
     </div>
 </template>
+
+<style scoped>
+.circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 200px;
+}
+.video {
+    width: 200px;
+    height: 200px;
+}
+</style>

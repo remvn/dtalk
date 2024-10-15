@@ -10,17 +10,27 @@ import {
     LocalTrackPublication,
     LocalParticipant
 } from 'livekit-client'
+import { triggerRef, type ShallowRef } from 'vue'
+
+export type MeetingRender = {
+    participantID: string
+    videoElement?: {
+        srcObject: MediaProvider | null
+    }
+    audioElement?: HTMLAudioElement
+}
 
 type MeetingParams = {
     url: string
     token: string
+    renderArr: ShallowRef<MeetingRender[], MeetingRender[]>
 }
 
 export class Meeting {
     room: Room
     url: string
     token: string
-    container: HTMLDivElement | null
+    renderArr: ShallowRef<MeetingRender[], MeetingRender[]>
 
     constructor(params: MeetingParams) {
         this.room = new Room({
@@ -35,7 +45,7 @@ export class Meeting {
                 resolution: VideoPresets.h720.resolution
             }
         })
-        this.container = null
+        this.renderArr = params.renderArr
         this.url = params.url
         this.token = params.token
     }
@@ -50,24 +60,57 @@ export class Meeting {
 
     setListener() {
         this.room
-            .on(RoomEvent.TrackSubscribed, this.handleTrackSubscribed)
-            .on(RoomEvent.TrackUnsubscribed, this.handleTrackUnsubscribed)
-            .on(RoomEvent.ActiveSpeakersChanged, this.handleActiveSpeakerChange)
-            .on(RoomEvent.Disconnected, this.handleDisconnect)
-            .on(RoomEvent.LocalTrackUnpublished, this.handleLocalTrackUnpublished)
+            .on(RoomEvent.LocalTrackPublished, this.handleLocalTrackPublished.bind(this))
+            .on(RoomEvent.LocalTrackUnpublished, this.handleLocalTrackUnpublished.bind(this))
+            .on(RoomEvent.TrackSubscribed, this.handleTrackSubscribed.bind(this))
+            .on(RoomEvent.TrackUnsubscribed, this.handleTrackUnsubscribed.bind(this))
+            .on(RoomEvent.ActiveSpeakersChanged, this.handleActiveSpeakerChange.bind(this))
+            .on(RoomEvent.Disconnected, this.handleDisconnect.bind(this))
+    }
+
+    getRender(id: string): MeetingRender | null {
+        for (const item of this.renderArr.value) {
+            if (item.participantID === id) {
+                return item
+            }
+        }
+        return null
+    }
+
+    handleLocalTrackPublished(pub: LocalTrackPublication, participant: LocalParticipant) {
+        const track = pub.track
+        console.log('handleLocalTrackPublished', track?.kind)
+        if (pub.kind !== Track.Kind.Video) return
+        if (track == null || track.mediaStream == null) return
+
+        const arr = this.renderArr.value
+        let render = this.getRender(participant.identity)
+        if (render == null) {
+            render = {
+                participantID: participant.identity,
+                videoElement: {
+                    srcObject: track.mediaStream
+                }
+            }
+            arr.push(render)
+        } else {
+            render.videoElement = {
+                srcObject: track.mediaStream
+            }
+        }
+        this.renderArr.value = arr
+        triggerRef(this.renderArr)
     }
 
     handleTrackSubscribed(
         track: RemoteTrack,
-        publication: RemoteTrackPublication,
+        pub: RemoteTrackPublication,
         participant: RemoteParticipant
     ) {
         console.log(`called`)
         if (track.kind === Track.Kind.Video || track.kind === Track.Kind.Audio) {
             // attach it to a new HTMLVideoElement or HTMLAudioElement
             const element = track.attach()
-            console.log(this.container)
-            this.container?.appendChild(element)
         }
     }
 

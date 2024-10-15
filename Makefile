@@ -10,6 +10,13 @@ build:
 run:
 	@go run ./cmd/main
 
+run-web:
+	@cd web && \
+	npm run dev 
+
+run-lk:
+	@livekit-server --dev
+
 test:
 	@echo "Testing..."
 
