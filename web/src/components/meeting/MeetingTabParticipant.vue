@@ -14,8 +14,8 @@ import { TabsContent } from '@/components/ui/tabs'
 </script>
 
 <template>
-    <TabsContent value="participant">
-        <Card>
+    <TabsContent value="participant" class="h-full">
+        <Card class="h-full">
             <CardHeader>
                 <CardTitle>Participants</CardTitle>
                 <CardDescription>

@@ -3,7 +3,7 @@ import { getLkServerURL } from '@/lib/config'
 import { Meeting, type MeetingRenderMap } from '@/logic/meeting-service'
 import { useMeetingData } from '@/stores/meeting-store'
 import { onBeforeUnmount, onMounted, provide, ref, shallowRef } from 'vue'
-import { breakpointsTailwind, useBreakpoints, useThrottleFn } from '@vueuse/core'
+import { useThrottleFn } from '@vueuse/core'
 import MdiPhoneHangup from '~icons/mdi/phone-hangup'
 import { Button } from '@/components/ui/button'
 import MediaToggleButton from '@/components/MediaToggleButton.vue'
@@ -12,7 +12,10 @@ import MdiMicrophoneOutline from '~icons/mdi/microphone-outline'
 import MdiCameraOff from '~icons/mdi/camera-off'
 import MdiCameraOutline from '~icons/mdi/camera-outline'
 import MeetingTab from '@/components/meeting/MeetingTab.vue'
-import { type MeetingTabState, MeetingTabStateKey } from '@/types/meeting'
+import { MeetingTabComposableKey } from '@/types/meeting'
+import { useTwBreakpoints } from '@/hooks/use-tw-breakpoints'
+import { useMeetingTab } from '@/hooks/use-meeting-tab'
+import MeetingTabToggleBar from '@/components/meeting/MeetingTabToggleBar.vue'
 
 const meetingData = useMeetingData()
 const renderMap = shallowRef<MeetingRenderMap>(new Map())
@@ -24,7 +27,7 @@ const meeting = new Meeting({
     setGridSize: setGridSize
 })
 
-const breakpoints = useBreakpoints(breakpointsTailwind)
+const breakpoints = useTwBreakpoints()
 const gridSize = ref({
     col: 1,
     row: 1
@@ -66,12 +69,8 @@ async function handleMicroToggle() {
 
 async function handleDisconnect() {}
 
-const tabState = ref<MeetingTabState>({
-    isDrawerOpen: false,
-    isDialogOpen: false,
-    selectedTab: 'participant'
-})
-provide(MeetingTabStateKey, tabState)
+const meetingTab = useMeetingTab()
+provide(MeetingTabComposableKey, meetingTab)
 
 onMounted(async () => {
     meeting.setListener()
@@ -85,6 +84,8 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     window.removeEventListener('resize', handleWindowResize)
 })
+
+const iconClass = 'size-6'
 </script>
 
 <template>
@@ -110,8 +111,8 @@ onBeforeUnmount(() => {
                         ></audio>
                     </div>
                 </div>
-                <div v-if="tabState.isDrawerOpen" class="w-[400px]">
-                    <MeetingTab v-model="tabState.selectedTab"></MeetingTab>
+                <div v-if="meetingTab.state.value.isDrawerOpen" class="w-[358px] p-4 flex-shrink-0">
+                    <MeetingTab></MeetingTab>
                 </div>
             </div>
             <div class="row-span-1 flex justify-between items-center px-6 py-4">
@@ -119,18 +120,18 @@ onBeforeUnmount(() => {
                 <div class="flex gap-3">
                     <MediaToggleButton @toggle="handleMicroToggle" :is-enabled="isMicroEnabled">
                         <template #disabled>
-                            <MdiMicrophoneOutline class="size-6"></MdiMicrophoneOutline>
+                            <MdiMicrophoneOutline :class="iconClass"></MdiMicrophoneOutline>
                         </template>
                         <template #enabled>
-                            <MdiMicrophoneOff class="size-6"></MdiMicrophoneOff>
+                            <MdiMicrophoneOff :class="iconClass"></MdiMicrophoneOff>
                         </template>
                     </MediaToggleButton>
                     <MediaToggleButton @toggle="handleCameraToggle" :is-enabled="isCameraEnabled">
                         <template #disabled>
-                            <MdiCameraOutline class="size-6"></MdiCameraOutline>
+                            <MdiCameraOutline :class="iconClass"></MdiCameraOutline>
                         </template>
                         <template #enabled>
-                            <MdiCameraOff class="size-6"></MdiCameraOff>
+                            <MdiCameraOff :class="iconClass"></MdiCameraOff>
                         </template>
                     </MediaToggleButton>
                     <Button
@@ -139,10 +140,10 @@ onBeforeUnmount(() => {
                         class="h-12 w-20 rounded-full"
                         variant="destructive"
                     >
-                        <MdiPhoneHangup class="size-6"></MdiPhoneHangup>
+                        <MdiPhoneHangup :class="iconClass"></MdiPhoneHangup>
                     </Button>
                 </div>
-                <span class="text-lg">Settings</span>
+                <MeetingTabToggleBar :icon-class="iconClass"></MeetingTabToggleBar>
             </div>
         </div>
     </div>

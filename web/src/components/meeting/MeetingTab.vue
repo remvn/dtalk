@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs } from '@/components/ui/tabs'
 import MeetingTabParticipant from '@/components/meeting/MeetingTabParticipant.vue'
-import { inject, type Ref } from 'vue'
-import { MeetingTabStateKey, type MeetingTabState } from '@/types/meeting'
+import { inject } from 'vue'
+import { MeetingTabComposableKey } from '@/types/meeting'
 
-const tabState = inject(MeetingTabStateKey) as Ref<MeetingTabState>
+const meetingTab = inject(MeetingTabComposableKey)!
 </script>
 
 <template>
-    <Tabs v-model="tabState.selectedTab" class="w-[400px]">
-        <TabsList class="grid w-full grid-cols-2">
-            <TabsTrigger value="participant"> Participants </TabsTrigger>
-            <TabsTrigger value="chat"> Chat </TabsTrigger>
-        </TabsList>
+    <Tabs v-model="meetingTab.state.value.selectedTab" class="w-full h-full">
         <MeetingTabParticipant></MeetingTabParticipant>
     </Tabs>
 </template>

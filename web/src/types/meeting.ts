@@ -5,4 +5,8 @@ export type MeetingTabState = {
     isDialogOpen: boolean
     selectedTab: string
 }
-export const MeetingTabStateKey = Symbol() as InjectionKey<Ref<MeetingTabState>>
+export type MeetingTabComposable = {
+    state: Ref<MeetingTabState>
+    toggleTab: (name: string) => void
+}
+export const MeetingTabComposableKey = Symbol() as InjectionKey<MeetingTabComposable>
