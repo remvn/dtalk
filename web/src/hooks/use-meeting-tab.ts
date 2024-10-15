@@ -12,13 +12,13 @@ export function useMeetingTab() {
 
     function toggleTab(name: string) {
         if (breakpoints.isGreaterOrEqual('lg')) {
-            if (state.value.isDrawerOpen) {
+            if (state.value.isDrawerOpen && state.value.selectedTab === name) {
                 state.value.isDrawerOpen = false
                 return
             }
             state.value.isDrawerOpen = true
         } else {
-            if (state.value.isDialogOpen) {
+            if (state.value.isDialogOpen && state.value.selectedTab === name) {
                 state.value.isDialogOpen = false
                 return
             }
