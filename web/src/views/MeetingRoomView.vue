@@ -11,7 +11,7 @@ import MdiMicrophoneOff from '~icons/mdi/microphone-off'
 import MdiMicrophoneOutline from '~icons/mdi/microphone-outline'
 import MdiCameraOff from '~icons/mdi/camera-off'
 import MdiCameraOutline from '~icons/mdi/camera-outline'
-import MeetingTab from '@/components/MeetingTab.vue'
+import MeetingTab from '@/components/meeting/MeetingTab.vue'
 import { type MeetingTabState, MeetingTabStateKey } from '@/types/meeting'
 
 const meetingData = useMeetingData()

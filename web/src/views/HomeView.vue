@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import MeetingCreateDialog from '@/components/MeetingCreateDialog.vue'
+import MeetingCreateDialog from '@/components/meeting/MeetingCreateDialog.vue'
 import NavBar from '@/components/NavBar.vue'
 import { Button } from '@/components/ui/button'
 </script>

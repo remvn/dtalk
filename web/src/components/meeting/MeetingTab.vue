@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import MeetingTabParticipant from './MeetingTabParticipant.vue'
+import MeetingTabParticipant from '@/components/meeting/MeetingTabParticipant.vue'
 import { inject, type Ref } from 'vue'
 import { MeetingTabStateKey, type MeetingTabState } from '@/types/meeting'
 
