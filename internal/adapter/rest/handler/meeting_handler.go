@@ -17,7 +17,7 @@ type MeetingHandler struct {
 	authMiddleware     *middleware.Auth
 	roomAuthMiddleware *middleware.RoomAuth
 
-	meetingPort port.MeetingPort
+	meetingPort port.MeetingServiceInterface
 }
 
 func NewMeetingHandler(
@@ -25,7 +25,7 @@ func NewMeetingHandler(
 	authMiddleware *middleware.Auth,
 	roomAuthMiddlware *middleware.RoomAuth,
 
-	meetingPort port.MeetingPort,
+	meetingPort port.MeetingServiceInterface,
 ) *MeetingHandler {
 	handler := &MeetingHandler{
 		echoServer:         echoServer,
@@ -259,7 +259,9 @@ func (handler *MeetingHandler) listJoinRequesters(c echo.Context) error {
 
 	meeting, err := handler.meetingPort.GetMeeting(dto.RoomID)
 	if err != nil {
-		return c.String(http.StatusNotFound, dtalk.ErrRoomNonExistent.Error())
+		return c.JSON(http.StatusNotFound, MessageRes{
+			Message: dtalk.ErrRoomNonExistent.Error(),
+		})
 	}
 
 	arr := meeting.Data.ListJoinRequesters()

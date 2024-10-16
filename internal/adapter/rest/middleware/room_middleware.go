@@ -10,10 +10,10 @@ import (
 )
 
 type RoomAuth struct {
-	meetingPort port.MeetingPort
+	meetingPort port.MeetingServiceInterface
 }
 
-func NewRoomAuth(meetingPort port.MeetingPort) *RoomAuth {
+func NewRoomAuth(meetingPort port.MeetingServiceInterface) *RoomAuth {
 	return &RoomAuth{
 		meetingPort: meetingPort,
 	}

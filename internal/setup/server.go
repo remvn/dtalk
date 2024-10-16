@@ -19,8 +19,8 @@ import (
 type Server struct {
 	echoServer *echo.Echo
 
-	roomManager    port.RoomManager
-	meetingService port.MeetingPort
+	roomClient     port.RoomClientInterface
+	meetingService port.MeetingServiceInterface
 }
 
 type ServerConfig struct {
@@ -36,7 +36,7 @@ func NewServer(config ServerConfig, lkConfig lk.Config) *Server {
 		}))
 	}
 
-	roomManager := lk.NewLkRoomManager(lkConfig)
+	roomManager := lk.NewRoomClient(lkConfig)
 	meetingService := meeting.NewMeetingService(roomManager)
 
 	parentGroup := echoServer.Group("/api")
@@ -60,7 +60,7 @@ func NewServer(config ServerConfig, lkConfig lk.Config) *Server {
 
 	server := &Server{
 		echoServer:     echoServer,
-		roomManager:    roomManager,
+		roomClient:     roomManager,
 		meetingService: meetingService,
 	}
 

@@ -13,11 +13,11 @@ import (
 	lksdk "github.com/livekit/server-sdk-go/v2"
 )
 
-var _ port.RoomManager = (*LkRoomManager)(nil)
+var _ port.RoomClientInterface = (*RoomClient)(nil)
 
-type LkRoomManager struct {
-	roomClient *lksdk.RoomServiceClient
-	options    Config
+type RoomClient struct {
+	service *lksdk.RoomServiceClient
+	options Config
 }
 
 type Config struct {
@@ -26,21 +26,21 @@ type Config struct {
 	ApiSecret string
 }
 
-func NewLkRoomManager(options Config) *LkRoomManager {
-	roomClient := lksdk.NewRoomServiceClient(
+func NewRoomClient(options Config) *RoomClient {
+	service := lksdk.NewRoomServiceClient(
 		options.HostURL,
 		options.ApiKey,
 		options.ApiSecret,
 	)
-	service := &LkRoomManager{
-		roomClient: roomClient,
-		options:    options,
+	client := &RoomClient{
+		service: service,
+		options: options,
 	}
 
-	return service
+	return client
 }
 
-func (manager *LkRoomManager) GetJoinToken(roomID string, params dtalk.JoinTokenParams) (string, error) {
+func (manager *RoomClient) GetJoinToken(roomID string, params dtalk.JoinTokenParams) (string, error) {
 	options := manager.options
 	token := auth.NewAccessToken(options.ApiKey, options.ApiSecret)
 	grant := &auth.VideoGrant{
@@ -60,8 +60,8 @@ func (manager *LkRoomManager) GetJoinToken(roomID string, params dtalk.JoinToken
 	return tokenStr, nil
 }
 
-func (manager *LkRoomManager) CreateRoom() (*dtalk.Room, error) {
-	client := manager.roomClient
+func (manager *RoomClient) CreateRoom() (*dtalk.Room, error) {
+	client := manager.service
 
 	roomID := random.GenerateID()
 	room, err := client.CreateRoom(context.Background(), &livekit.CreateRoomRequest{
@@ -77,8 +77,8 @@ func (manager *LkRoomManager) CreateRoom() (*dtalk.Room, error) {
 	return manager.convertRoom(room), nil
 }
 
-func (manager *LkRoomManager) GetRoom(roomID string) (*dtalk.Room, error) {
-	res, err := manager.roomClient.ListRooms(context.Background(), &livekit.ListRoomsRequest{
+func (manager *RoomClient) GetRoom(roomID string) (*dtalk.Room, error) {
+	res, err := manager.service.ListRooms(context.Background(), &livekit.ListRoomsRequest{
 		Names: []string{roomID},
 	})
 	if err != nil {
@@ -91,13 +91,13 @@ func (manager *LkRoomManager) GetRoom(roomID string) (*dtalk.Room, error) {
 	return room, nil
 }
 
-func (manager *LkRoomManager) convertRoom(lkRoom *livekit.Room) *dtalk.Room {
+func (manager *RoomClient) convertRoom(lkRoom *livekit.Room) *dtalk.Room {
 	return &dtalk.Room{
 		ID: lkRoom.Name,
 	}
 }
 
-func (manager *LkRoomManager) GetParticipant(roomID string, participantID string) (*dtalk.Participant, error) {
+func (manager *RoomClient) GetParticipant(roomID string, participantID string) (*dtalk.Participant, error) {
 	lkPart, err := manager.getLkParticipant(roomID, participantID)
 	if err != nil {
 		return nil, err
@@ -105,8 +105,8 @@ func (manager *LkRoomManager) GetParticipant(roomID string, participantID string
 	return manager.convertParticipant(lkPart), nil
 }
 
-func (manager *LkRoomManager) getLkParticipant(roomID string, participantID string) (*livekit.ParticipantInfo, error) {
-	res, err := manager.roomClient.GetParticipant(context.Background(), &livekit.RoomParticipantIdentity{
+func (manager *RoomClient) getLkParticipant(roomID string, participantID string) (*livekit.ParticipantInfo, error) {
+	res, err := manager.service.GetParticipant(context.Background(), &livekit.RoomParticipantIdentity{
 		Room:     roomID,
 		Identity: participantID,
 	})
@@ -116,7 +116,7 @@ func (manager *LkRoomManager) getLkParticipant(roomID string, participantID stri
 	return res, nil
 }
 
-func (manager *LkRoomManager) ListParticipants(roomID string) ([]*dtalk.Participant, error) {
+func (manager *RoomClient) ListParticipants(roomID string) ([]*dtalk.Participant, error) {
 	lkArr, err := manager.listLkParticipants(roomID)
 	if err != nil {
 		return nil, err
@@ -128,8 +128,8 @@ func (manager *LkRoomManager) ListParticipants(roomID string) ([]*dtalk.Particip
 	return arr, nil
 }
 
-func (manager *LkRoomManager) listLkParticipants(roomID string) ([]*livekit.ParticipantInfo, error) {
-	res, err := manager.roomClient.ListParticipants(
+func (manager *RoomClient) listLkParticipants(roomID string) ([]*livekit.ParticipantInfo, error) {
+	res, err := manager.service.ListParticipants(
 		context.Background(),
 		&livekit.ListParticipantsRequest{
 			Room: roomID,
@@ -141,19 +141,19 @@ func (manager *LkRoomManager) listLkParticipants(roomID string) ([]*livekit.Part
 	return res.Participants, nil
 }
 
-func (manager *LkRoomManager) convertParticipant(lkParticipant *livekit.ParticipantInfo) *dtalk.Participant {
+func (manager *RoomClient) convertParticipant(lkParticipant *livekit.ParticipantInfo) *dtalk.Participant {
 	return &dtalk.Participant{
 		ID:   lkParticipant.Identity,
 		Name: lkParticipant.Name,
 	}
 }
 
-func (manager *LkRoomManager) SendData(roomID string, destIDs []string, data any) error {
+func (manager *RoomClient) SendData(roomID string, destIDs []string, data any) error {
 	bytes, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
-	_, err = manager.roomClient.SendData(context.Background(), &livekit.SendDataRequest{
+	_, err = manager.service.SendData(context.Background(), &livekit.SendDataRequest{
 		Room:                  roomID,
 		Data:                  bytes,
 		DestinationIdentities: destIDs,

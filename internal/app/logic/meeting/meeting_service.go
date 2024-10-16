@@ -6,29 +6,29 @@ import (
 	"dtalk/internal/pkg/cmap"
 )
 
-var _ port.MeetingPort = (*MeetingService)(nil)
+var _ port.MeetingServiceInterface = (*MeetingService)(nil)
 
 type MeetingService struct {
-	roomManager port.RoomManager
+	roomClient port.RoomClientInterface
 
 	meetingMap *cmap.CMap[string, *dtalk.MeetingData]
 }
 
 func NewMeetingService(
-	roomManager port.RoomManager,
+	roomClient port.RoomClientInterface,
 ) *MeetingService {
 	return &MeetingService{
-		roomManager: roomManager,
-		meetingMap:  cmap.New[string, *dtalk.MeetingData](),
+		roomClient: roomClient,
+		meetingMap: cmap.New[string, *dtalk.MeetingData](),
 	}
 }
 
 func (service *MeetingService) GetMeeting(roomId string) (*dtalk.Meeting, error) {
-	meeting, ok := service.Load(roomId)
+	meeting, ok := service.GetMeetingData(roomId)
 	if !ok {
 		return nil, dtalk.ErrRoomNonExistent
 	}
-	room, err := service.roomManager.GetRoom(roomId)
+	room, err := service.roomClient.GetRoom(roomId)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (service *MeetingService) GetMeeting(roomId string) (*dtalk.Meeting, error)
 }
 
 func (service *MeetingService) CreateMeeting(params dtalk.CreateMeetingParams) (*dtalk.Meeting, error) {
-	room, err := service.roomManager.CreateRoom()
+	room, err := service.roomClient.CreateRoom()
 	if err != nil {
 		return nil, err
 	}
@@ -57,19 +57,19 @@ func (service *MeetingService) CreateMeeting(params dtalk.CreateMeetingParams) (
 }
 
 func (service *MeetingService) GetParticipant(roomID string, participantID string) (*dtalk.Participant, error) {
-	return service.roomManager.GetParticipant(roomID, participantID)
+	return service.roomClient.GetParticipant(roomID, participantID)
 }
 
 func (service *MeetingService) ListParticipants(roomID string) ([]*dtalk.Participant, error) {
-	return service.roomManager.ListParticipants(roomID)
+	return service.roomClient.ListParticipants(roomID)
 }
 
-func (service *MeetingService) Load(roomID string) (*dtalk.MeetingData, bool) {
+func (service *MeetingService) GetMeetingData(roomID string) (*dtalk.MeetingData, bool) {
 	return service.meetingMap.Load(roomID)
 }
 
 func (service *MeetingService) GetJoinToken(roomID string, params dtalk.JoinTokenParams) (string, error) {
-	return service.roomManager.GetJoinToken(roomID, params)
+	return service.roomClient.GetJoinToken(roomID, params)
 }
 
 func (service *MeetingService) AddJoinRequest(
@@ -103,7 +103,7 @@ func (service *MeetingService) SendJoinRequestPacket(roomID string) error {
 	}
 
 	pendingCount := len(meeting.Data.ListJoinRequesters())
-	err = service.roomManager.SendData(
+	err = service.roomClient.SendData(
 		roomID,
 		[]string{meeting.Data.HostID()},
 		NewPendingJoinRequestPacket(pendingCount),
