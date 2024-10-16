@@ -1,8 +1,11 @@
-package handler
+package setup
 
 import (
+	"dtalk/internal/adapter/lk"
+	"dtalk/internal/adapter/rest/handler"
 	"dtalk/internal/adapter/rest/middleware"
-	"dtalk/internal/app/logic/lk"
+	"dtalk/internal/app/logic/meeting"
+	"dtalk/internal/app/port"
 	"dtalk/internal/config"
 	"fmt"
 	"log"
@@ -11,9 +14,13 @@ import (
 	echoMW "github.com/labstack/echo/v4/middleware"
 )
 
+// wire up everything
+
 type Server struct {
 	echoServer *echo.Echo
-	LkService  *lk.Service
+
+	roomManager    port.RoomManager
+	meetingService port.MeetingPort
 }
 
 type ServerConfig struct {
@@ -29,27 +36,32 @@ func NewServer(config ServerConfig, lkConfig lk.Config) *Server {
 		}))
 	}
 
-	lkService := lk.NewLkService(lkConfig)
+	roomManager := lk.NewLkRoomManager(lkConfig)
+	meetingService := meeting.NewMeetingService(roomManager)
 
 	server := &Server{
 		echoServer: echoServer,
-		LkService:  lkService,
+
+		roomManager:    roomManager,
+		meetingService: meetingService,
 	}
 
 	parentGroup := echoServer.Group("/api")
-	authMiddleware := middleware.NewAuthMiddleware(config.AuthTokenConfig)
+	authMiddleware := middleware.NewAuth(config.AuthTokenConfig)
+	roomAuthMiddleware := middleware.NewRoomAuth(meetingService)
 
-	authHandler := NewAuthHandler(
+	authHandler := handler.NewAuthHandler(
 		config.AuthTokenConfig,
 		echoServer,
 		authMiddleware,
 	)
 	authHandler.Register(parentGroup)
 
-	meetingHandler := NewMeetingHandler(
+	meetingHandler := handler.NewMeetingHandler(
 		echoServer,
-		lkService,
 		authMiddleware,
+		roomAuthMiddleware,
+		meetingService,
 	)
 	meetingHandler.Register(parentGroup)
 

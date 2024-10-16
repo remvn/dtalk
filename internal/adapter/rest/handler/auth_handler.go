@@ -14,13 +14,13 @@ import (
 type AuthHandler struct {
 	tokenConfig    config.JwtTokenConfig
 	echoServer     *echo.Echo
-	authMiddleware *middleware.AuthMiddleware
+	authMiddleware *middleware.Auth
 }
 
 func NewAuthHandler(
 	tokenConfig config.JwtTokenConfig,
 	echoServer *echo.Echo,
-	authMiddleware *middleware.AuthMiddleware,
+	authMiddleware *middleware.Auth,
 ) *AuthHandler {
 	handler := &AuthHandler{
 		echoServer:     echoServer,

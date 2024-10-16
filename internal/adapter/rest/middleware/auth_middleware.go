@@ -13,21 +13,21 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type AuthMiddleware struct {
+type Auth struct {
 	tokenConfig config.JwtTokenConfig
 }
 
-func NewAuthMiddleware(tokenConfig config.JwtTokenConfig) *AuthMiddleware {
-	return &AuthMiddleware{
+func NewAuth(tokenConfig config.JwtTokenConfig) *Auth {
+	return &Auth{
 		tokenConfig: tokenConfig,
 	}
 }
 
-func (m *AuthMiddleware) Apply(consumer consumer) {
+func (m *Auth) Apply(consumer consumer) {
 	consumer.Use(m.validate(), m.extract())
 }
 
-func (m *AuthMiddleware) validate() echo.MiddlewareFunc {
+func (m *Auth) validate() echo.MiddlewareFunc {
 	return echojwt.WithConfig(echojwt.Config{
 		ContextKey:  UserTokenContextKey,
 		SigningKey:  m.tokenConfig.Secret,
@@ -37,7 +37,7 @@ func (m *AuthMiddleware) validate() echo.MiddlewareFunc {
 
 var ErrUnableToExtract = errors.New("unable to extract data from context")
 
-func (m *AuthMiddleware) extract() echo.MiddlewareFunc {
+func (m *Auth) extract() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			token, ok := c.Get(UserTokenContextKey).(*jwt.Token)

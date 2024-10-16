@@ -3,6 +3,7 @@ module dtalk
 go 1.23.0
 
 require (
+	github.com/caarlos0/env/v11 v11.2.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo-jwt/v4 v4.2.0
@@ -18,7 +19,6 @@ require (
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/bufbuild/protovalidate-go v0.6.1 // indirect
 	github.com/bufbuild/protoyaml-go v0.1.9 // indirect
-	github.com/caarlos0/env/v11 v11.2.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gammazero/deque v0.2.1 // indirect
 	github.com/go-jose/go-jose/v3 v3.0.3 // indirect

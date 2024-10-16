@@ -1,4 +1,4 @@
-package lk
+package meeting
 
 // type Packeter interface {
 // 	GetKind() string

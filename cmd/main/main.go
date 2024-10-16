@@ -1,9 +1,9 @@
 package main
 
 import (
-	"dtalk/internal/adapter/rest/handler"
-	"dtalk/internal/app/logic/lk"
+	"dtalk/internal/adapter/lk"
 	"dtalk/internal/config"
+	"dtalk/internal/setup"
 	"log"
 	"time"
 
@@ -28,6 +28,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if appConfig.AppEnv != "local" && appConfig.AppEnv != "production" {
+		log.Fatalf("invalid APP_ENV: %s", appConfig.AppEnv)
+	}
+
 	lkConf := lk.Config{
 		HostURL:   appConfig.LiveKitHostURL,
 		ApiKey:    appConfig.LiveKitAPIKey,
@@ -39,7 +43,7 @@ func main() {
 		cors = []string{"*"}
 	}
 
-	serverConf := handler.ServerConfig{
+	serverConf := setup.ServerConfig{
 		AuthTokenConfig: config.JwtTokenConfig{
 			Name:     "access_token",
 			Secret:   []byte(appConfig.AccessTokenSecret),
@@ -47,7 +51,7 @@ func main() {
 		},
 		CORS: cors,
 	}
-	server := handler.NewServer(serverConf, lkConf)
+	server := setup.NewServer(serverConf, lkConf)
 
 	server.Start(appConfig.Port)
 }
