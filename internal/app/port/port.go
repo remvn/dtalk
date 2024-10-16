@@ -7,7 +7,7 @@ type MeetingServiceIface interface {
 	CreateMeeting(params dtalk.CreateMeetingParams) (*dtalk.Meeting, error)
 	GetMeetingData(roomID string) (*dtalk.MeetingData, bool)
 	AddJoinRequest(requester *dtalk.UserTokenInfo, roomID string) (<-chan bool, error)
-	SendJoinRequestPacket(roomID string) error
+	NotifyNewJoinRequest(roomID string) error
 	GetJoinToken(roomID string, params dtalk.JoinTokenParams) (string, error)
 	GetParticipant(roomID string, participantID string) (*dtalk.Participant, error)
 	ListParticipants(roomID string) ([]*dtalk.Participant, error)

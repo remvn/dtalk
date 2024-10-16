@@ -54,7 +54,7 @@ func (handler *MeetingHandler) Register(parentGroup *echo.Group) {
 	roomAuthGroup := parentGroup.Group(prefix)
 	handler.authMiddleware.Apply(roomAuthGroup)
 	handler.roomAuthMiddleware.Apply(roomAuthGroup)
-	roomAuthGroup.GET("/participants", handler.listParticipant)
+	roomAuthGroup.GET("/participants", handler.listParticipants)
 	roomAuthGroup.GET("/join-requesters", handler.listJoinRequesters)
 	roomAuthGroup.POST("/accept", handler.accept)
 }
@@ -162,7 +162,7 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 	if err != nil {
 		return c.NoContent(http.StatusInternalServerError)
 	}
-	_ = handler.meetingPort.SendJoinRequestPacket(meeting.Data.RoomID())
+	_ = handler.meetingPort.NotifyNewJoinRequest(meeting.Data.RoomID())
 
 	accepted := false
 	select {
@@ -235,7 +235,7 @@ func (handler *MeetingHandler) accept(c echo.Context) error {
 	return c.NoContent(http.StatusOK)
 }
 
-func (handler *MeetingHandler) listParticipant(c echo.Context) error {
+func (handler *MeetingHandler) listParticipants(c echo.Context) error {
 	dto := &roomOperationDto{}
 	if err := c.Bind(dto); err != nil {
 		logHandlerError(c, err)

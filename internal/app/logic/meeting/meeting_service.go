@@ -93,7 +93,7 @@ func (service *MeetingService) AddJoinRequest(
 	return request.ResultChan, nil
 }
 
-func (service *MeetingService) SendJoinRequestPacket(roomID string) error {
+func (service *MeetingService) NotifyNewJoinRequest(roomID string) error {
 	meeting, err := service.GetMeeting(roomID)
 	if err != nil {
 		return err
