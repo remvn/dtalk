@@ -39,13 +39,6 @@ func NewServer(config ServerConfig, lkConfig lk.Config) *Server {
 	roomManager := lk.NewLkRoomManager(lkConfig)
 	meetingService := meeting.NewMeetingService(roomManager)
 
-	server := &Server{
-		echoServer: echoServer,
-
-		roomManager:    roomManager,
-		meetingService: meetingService,
-	}
-
 	parentGroup := echoServer.Group("/api")
 	authMiddleware := middleware.NewAuth(config.AuthTokenConfig)
 	roomAuthMiddleware := middleware.NewRoomAuth(meetingService)
@@ -64,6 +57,12 @@ func NewServer(config ServerConfig, lkConfig lk.Config) *Server {
 		meetingService,
 	)
 	meetingHandler.Register(parentGroup)
+
+	server := &Server{
+		echoServer:     echoServer,
+		roomManager:    roomManager,
+		meetingService: meetingService,
+	}
 
 	return server
 }

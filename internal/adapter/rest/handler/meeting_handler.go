@@ -55,6 +55,7 @@ func (handler *MeetingHandler) Register(parentGroup *echo.Group) {
 	handler.authMiddleware.Apply(roomAuthGroup)
 	handler.roomAuthMiddleware.Apply(roomAuthGroup)
 	roomAuthGroup.GET("/participants", handler.listParticipant)
+	roomAuthGroup.GET("/join-requesters", handler.listJoinRequesters)
 	roomAuthGroup.POST("/accept", handler.accept)
 }
 
@@ -65,6 +66,8 @@ type createMeetingDto struct {
 type createMeetingRes struct {
 	RoomID string `json:"room_id"`
 }
+
+// public routes
 
 func (handler *MeetingHandler) create(c echo.Context) error {
 	dto := &createMeetingDto{}
@@ -112,6 +115,8 @@ func (handler *MeetingHandler) publicData(c echo.Context) error {
 type joinMeetingDto struct {
 	RoomID string `json:"room_id"`
 }
+
+// auth protected routes
 
 type joinMeetingRes struct {
 	OK        bool   `json:"ok"`
@@ -188,9 +193,11 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 	}
 }
 
+// auth & room protected routes
+
 type acceptRequestDto struct {
+	roomOperationDto
 	Accepted    bool   `json:"accepted"`
-	RoomID      string `json:"room_id"`
 	RequesterID string `json:"requester_id"`
 }
 
@@ -229,15 +236,32 @@ func (handler *MeetingHandler) accept(c echo.Context) error {
 }
 
 func (handler *MeetingHandler) listParticipant(c echo.Context) error {
-	roomID := ""
-	if err := echo.QueryParamsBinder(c).String("room_id", &roomID); err != nil {
-		return c.NoContent(http.StatusBadRequest)
+	dto := &roomOperationDto{}
+	if err := c.Bind(dto); err != nil {
+		logHandlerError(c, err)
+		return c.NoContent(http.StatusInternalServerError)
 	}
 
-	arr, err := handler.meetingPort.ListParticipants(roomID)
+	arr, err := handler.meetingPort.ListParticipants(dto.RoomID)
 	if err != nil {
 		log.Println(fmt.Errorf("error on %s: %w", c.Path(), err))
 		return c.NoContent(http.StatusInternalServerError)
 	}
+	return c.JSON(http.StatusOK, arr)
+}
+
+func (handler *MeetingHandler) listJoinRequesters(c echo.Context) error {
+	dto := &roomOperationDto{}
+	if err := c.Bind(dto); err != nil {
+		logHandlerError(c, err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+
+	meeting, err := handler.meetingPort.GetMeeting(dto.RoomID)
+	if err != nil {
+		return c.String(http.StatusNotFound, dtalk.ErrRoomNonExistent.Error())
+	}
+
+	arr := meeting.Data.ListJoinRequesters()
 	return c.JSON(http.StatusOK, arr)
 }

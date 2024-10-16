@@ -30,6 +30,8 @@ type MeetingJoinRequest struct {
 	ResultChan chan bool
 }
 
+// read operations
+
 func (data *MeetingData) Name() string {
 	data.m.RLock()
 	defer data.m.RUnlock()
@@ -48,6 +50,35 @@ func (data *MeetingData) HostID() string {
 	return data.hostID
 }
 
+func (data *MeetingData) ListJoinRequesters() []*UserTokenInfo {
+	data.m.RLock()
+	defer data.m.RUnlock()
+	arr := []*UserTokenInfo{}
+	for _, request := range data.joinRequestMap {
+		arr = append(arr, request.UserInfo)
+	}
+	return arr
+}
+
+func (data *MeetingData) ListJoinRequests() []*MeetingJoinRequest {
+	data.m.RLock()
+	defer data.m.Unlock()
+	arr := make([]*MeetingJoinRequest, 0, len(data.joinRequestMap))
+	for _, request := range data.joinRequestMap {
+		arr = append(arr, request)
+	}
+	return arr
+}
+
+func (data *MeetingData) GetJoinRequest(requesterID string) (*MeetingJoinRequest, bool) {
+	data.m.RLock()
+	defer data.m.RUnlock()
+	request, ok := data.joinRequestMap[requesterID]
+	return request, ok
+}
+
+// write operations
+
 func (data *MeetingData) SetHostID(hostID string) {
 	data.m.Lock()
 	defer data.m.Unlock()
@@ -58,23 +89,6 @@ func (data *MeetingData) AddJoinRequest(request *MeetingJoinRequest) {
 	data.m.Lock()
 	defer data.m.Unlock()
 	data.joinRequestMap[request.UserInfo.ID] = request
-}
-
-func (data *MeetingData) ListRequester() []*UserTokenInfo {
-	data.m.RLock()
-	defer data.m.RUnlock()
-	arr := []*UserTokenInfo{}
-	for _, request := range data.joinRequestMap {
-		arr = append(arr, request.UserInfo)
-	}
-	return arr
-}
-
-func (data *MeetingData) GetJoinRequest(requesterID string) (*MeetingJoinRequest, bool) {
-	data.m.RLock()
-	defer data.m.RUnlock()
-	request, ok := data.joinRequestMap[requesterID]
-	return request, ok
 }
 
 func (data *MeetingData) RemoveJoinRequest(requesterID string) {

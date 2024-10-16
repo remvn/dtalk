@@ -84,7 +84,6 @@ func (service *MeetingService) AddJoinRequest(
 		return nil, dtalk.ErrRoomNotReady
 	}
 
-	// handle join request
 	request := &dtalk.MeetingJoinRequest{
 		UserInfo:   requester,
 		ResultChan: make(chan bool),
@@ -103,7 +102,7 @@ func (service *MeetingService) SendJoinRequestPacket(roomID string) error {
 		return dtalk.ErrRoomNotReady
 	}
 
-	pendingCount := len(meeting.Data.ListRequester())
+	pendingCount := len(meeting.Data.ListJoinRequesters())
 	err = service.roomManager.SendData(
 		roomID,
 		[]string{meeting.Data.HostID()},
