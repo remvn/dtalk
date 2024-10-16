@@ -13,7 +13,7 @@ import (
 	lksdk "github.com/livekit/server-sdk-go/v2"
 )
 
-var _ port.RoomClientInterface = (*RoomClient)(nil)
+var _ port.RoomClientIface = (*RoomClient)(nil)
 
 type RoomClient struct {
 	service *lksdk.RoomServiceClient

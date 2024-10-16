@@ -2,7 +2,7 @@ package port
 
 import "dtalk/internal/app/dtalk"
 
-type MeetingServiceInterface interface {
+type MeetingServiceIface interface {
 	GetMeeting(roomID string) (*dtalk.Meeting, error)
 	CreateMeeting(params dtalk.CreateMeetingParams) (*dtalk.Meeting, error)
 	GetMeetingData(roomID string) (*dtalk.MeetingData, bool)
@@ -13,7 +13,7 @@ type MeetingServiceInterface interface {
 	ListParticipants(roomID string) ([]*dtalk.Participant, error)
 }
 
-type RoomClientInterface interface {
+type RoomClientIface interface {
 	GetRoom(roomID string) (*dtalk.Room, error)
 	CreateRoom() (*dtalk.Room, error)
 	SendData(roomID string, destIDs []string, data any) error

@@ -6,16 +6,16 @@ import (
 	"dtalk/internal/pkg/cmap"
 )
 
-var _ port.MeetingServiceInterface = (*MeetingService)(nil)
+var _ port.MeetingServiceIface = (*MeetingService)(nil)
 
 type MeetingService struct {
-	roomClient port.RoomClientInterface
+	roomClient port.RoomClientIface
 
 	meetingMap *cmap.CMap[string, *dtalk.MeetingData]
 }
 
 func NewMeetingService(
-	roomClient port.RoomClientInterface,
+	roomClient port.RoomClientIface,
 ) *MeetingService {
 	return &MeetingService{
 		roomClient: roomClient,

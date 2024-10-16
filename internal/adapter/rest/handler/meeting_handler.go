@@ -17,7 +17,7 @@ type MeetingHandler struct {
 	authMiddleware     *middleware.Auth
 	roomAuthMiddleware *middleware.RoomAuth
 
-	meetingPort port.MeetingServiceInterface
+	meetingPort port.MeetingServiceIface
 }
 
 func NewMeetingHandler(
@@ -25,7 +25,7 @@ func NewMeetingHandler(
 	authMiddleware *middleware.Auth,
 	roomAuthMiddlware *middleware.RoomAuth,
 
-	meetingPort port.MeetingServiceInterface,
+	meetingPort port.MeetingServiceIface,
 ) *MeetingHandler {
 	handler := &MeetingHandler{
 		echoServer:         echoServer,

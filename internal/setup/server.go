@@ -19,8 +19,8 @@ import (
 type Server struct {
 	echoServer *echo.Echo
 
-	roomClient     port.RoomClientInterface
-	meetingService port.MeetingServiceInterface
+	roomClient     port.RoomClientIface
+	meetingService port.MeetingServiceIface
 }
 
 type ServerConfig struct {
