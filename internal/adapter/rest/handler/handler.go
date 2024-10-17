@@ -8,7 +8,7 @@ import (
 )
 
 type roomOperationDto struct {
-	RoomID string `json:"room_id"`
+	RoomID string `json:"room_id" query:"room_id"`
 }
 
 type MessageRes struct {

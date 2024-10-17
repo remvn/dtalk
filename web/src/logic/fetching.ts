@@ -43,14 +43,11 @@ export async function getResMessage(res: Response) {
     }
 }
 
-export function convertKyError(error: HTTPError): HTTPError {
+export async function convertKyError(error: HTTPError): Promise<HTTPError> {
     const { response } = error
-    console.log(response)
     if (response && response.body) {
-        const body = response.body as any
-        error.message = body.message || error.message || response.statusText
+        error.message = await getResMessage(response)
     }
-
     return error
 }
 

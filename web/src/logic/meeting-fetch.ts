@@ -28,7 +28,8 @@ function listParticipants(params: { room_id: string }) {
     return ky
         .get<User[]>(getURL('/api/meeting/participants'), {
             searchParams: params,
-            hooks: defaultKyHooks
+            hooks: defaultKyHooks,
+            headers: getAuthHeader()
         })
         .json()
 }
@@ -37,7 +38,8 @@ function listJoinRequesters(params: { room_id: string }) {
     return ky
         .get<User[]>(getURL('/api/meeting/join-requesters'), {
             searchParams: params,
-            hooks: defaultKyHooks
+            hooks: defaultKyHooks,
+            headers: getAuthHeader()
         })
         .json()
 }

@@ -144,7 +144,8 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 	// room is just created, first one in will be the host
 	if meeting.Data.HostID() == "" {
 		token, err := handler.meetingService.GetJoinToken(meeting.Data.RoomID(), dtalk.JoinTokenParams{
-			ID: userInfo.ID,
+			ID:   userInfo.ID,
+			Name: userInfo.Name,
 		})
 		if err != nil {
 			return c.NoContent(http.StatusInternalServerError)
@@ -172,7 +173,8 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 
 	if accepted {
 		token, err := handler.meetingService.GetJoinToken(meeting.Data.RoomID(), dtalk.JoinTokenParams{
-			ID: userInfo.ID,
+			ID:   userInfo.ID,
+			Name: userInfo.Name,
 		})
 		if err != nil {
 			log.Println(err)

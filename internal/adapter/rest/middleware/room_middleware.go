@@ -35,6 +35,7 @@ func (m *RoomAuth) Func(next echo.HandlerFunc) echo.HandlerFunc {
 			log.Println(fmt.Errorf("unable to process RoomAuth middleware: %w", err))
 			return c.NoContent(http.StatusInternalServerError)
 		}
+
 		_, err = m.meetingPort.GetParticipant(dto.RoomID, userInfo.ID)
 		if err != nil {
 			return c.NoContent(http.StatusUnauthorized)
