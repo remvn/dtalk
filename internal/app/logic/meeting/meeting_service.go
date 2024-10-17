@@ -52,7 +52,7 @@ func (service *MeetingService) CreateMeeting(params dtalk.CreateMeetingParams) (
 		),
 		Room: room,
 	}
-	service.meetingMap.Set(meeting.Data.HostID(), meeting.Data)
+	service.meetingMap.Set(meeting.Data.RoomID(), meeting.Data)
 	return meeting, nil
 }
 

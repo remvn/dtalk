@@ -14,14 +14,15 @@ import {
     FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { joinMeeting, requestToken } from '@/logic/user-service'
+import { requestToken } from '@/logic/user-fetch'
 import { useUserInfo } from '@/stores/user-store'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useMeetingData } from '@/stores/meeting-store'
 import { useRouter } from 'vue-router'
 import { getJSON, getResMessage } from '@/logic/fetching'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import { ReloadIcon } from '@radix-icons/vue'
+import { meetingFetch } from '@/logic/meeting-fetch'
 
 const props = defineProps({
     room_id: String
@@ -49,15 +50,14 @@ const onSubmit = form.handleSubmit(async (values) => {
         let json = await getJSON(requestToken({ name: values.name }))
         userInfo.setInfo({ name: values.name, token: json.access_token })
 
-        const res = await joinMeeting({ room_id: props.room_id! })
+        const res = await meetingFetch.join({ room_id: props.room_id! })
         if (!res.ok) {
             errorMessage.value = await getResMessage(res)
             return
         }
         json = await res.json()
         meetingData.data = {
-            roomName: json.room_name,
-            token: json.access_token,
+            token: json.room_token,
             roomId: props.room_id!
         }
         router.push('/meeting/room')
@@ -68,6 +68,9 @@ const onSubmit = form.handleSubmit(async (values) => {
         loading.value = false
     }
 })
+
+const roomName = ref('')
+onMounted(() => {})
 </script>
 
 <template>

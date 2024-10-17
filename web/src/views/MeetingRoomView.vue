@@ -21,7 +21,7 @@ const meetingData = useMeetingData()
 const renderMap = shallowRef<MeetingRenderMap>(new Map())
 
 const meeting = new Meeting({
-    token: meetingData.data.token,
+    token: meetingData.data.token!,
     url: getLkServerURL(),
     renderMap: renderMap,
     setGridSize: setGridSize

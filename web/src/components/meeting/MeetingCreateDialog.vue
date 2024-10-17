@@ -23,10 +23,10 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { useForm } from 'vee-validate'
-import { createMeeting } from '@/logic/user-service'
 import { useRouter } from 'vue-router'
 import { getResMessage } from '@/logic/fetching'
 import { errorToast } from '@/logic/toast'
+import { meetingFetch } from '@/logic/meeting-fetch'
 
 const isOpen = ref(false)
 
@@ -46,7 +46,7 @@ const loading = ref(false)
 const onSubmit = form.handleSubmit(async (values) => {
     loading.value = true
     try {
-        const res = await createMeeting({
+        const res = await meetingFetch.create({
             room_name: values.room_name
         })
         if (!res.ok) {
