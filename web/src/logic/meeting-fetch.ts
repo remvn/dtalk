@@ -1,27 +1,44 @@
 import ky from 'ky'
-import { convertKyError, defaultHeaders, defaultKyHooks, getAuthHeader, getURL } from './fetching'
+import { defaultKyHooks, getAuthHeader, getURL } from './fetching'
 import type { User } from '@/types/user'
 
 function create(body: { room_name: string }) {
-    return fetch(getURL('/api/meeting/create'), {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: defaultHeaders
-    })
+    type Res = {
+        room_id: string
+    }
+    return ky
+        .post<Res>(getURL('/api/meeting/create'), {
+            json: body
+        })
+        .json()
 }
 
 function publicData(params: { room_id: string }) {
-    return fetch(getURL('/api/meeting/public-data', params), {
-        method: 'GET'
-    })
+    type Res = {
+        name: string
+    }
+    return ky
+        .get<Res>(getURL('/api/meeting/public-data'), {
+            searchParams: params,
+            hooks: defaultKyHooks
+        })
+        .json()
 }
 
 function join(body: { room_id: string }) {
-    return fetch(getURL('/api/meeting/join'), {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: getAuthHeader()
-    })
+    type Res = {
+        id: string
+        name: string
+        token: string
+        create_date: Date
+    }
+    return ky
+        .post<Res>(getURL('/api/meeting/join'), {
+            json: body,
+            hooks: defaultKyHooks,
+            headers: getAuthHeader()
+        })
+        .json()
 }
 
 function listParticipants(params: { room_id: string }) {

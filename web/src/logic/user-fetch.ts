@@ -1,9 +1,18 @@
-import { defaultHeaders, getURL } from './fetching'
+import ky from 'ky'
+import { defaultKyHooks, getURL } from './fetching'
 
-export function requestToken(body: { name: string }) {
-    return fetch(getURL('/api/auth/request-token'), {
-        method: 'POST',
-        body: JSON.stringify(body),
-        headers: defaultHeaders
-    })
+function requestToken(body: { name: string }) {
+    type Res = {
+        access_token: string
+    }
+    return ky
+        .post<Res>(getURL('/api/auth/request-token'), {
+            json: body,
+            hooks: defaultKyHooks
+        })
+        .json()
+}
+
+export const userFetch = {
+    requestToken
 }

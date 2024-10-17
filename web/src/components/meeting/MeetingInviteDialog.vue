@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button'
 const meetingData = useMeetingData()
 const location = useBrowserLocation()
 const inviteURL = computed(() => {
-    return `${location.value.origin}/meeting/join?id=${meetingData.data.roomId}`
+    return `${location.value.origin}/meeting/join?id=${meetingData.data.id}`
 })
 const { copy, copied } = useClipboard({ source: inviteURL })
 </script>

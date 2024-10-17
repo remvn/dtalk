@@ -6,16 +6,11 @@ type UserInfo = {
     token: string
 }
 
-export const useUserInfo = defineStore('user_info', () => {
-    const info = reactive<UserInfo>({
+export const useUserInfo = defineStore('user-info', () => {
+    const data = reactive<UserInfo>({
         name: '',
         token: ''
     })
 
-    function setInfo(newInfo: UserInfo) {
-        info.name = newInfo.name
-        info.token = newInfo.token
-    }
-
-    return { info, setInfo }
+    return { data }
 })

@@ -116,7 +116,7 @@ const iconClass = 'size-6'
                 </div>
             </div>
             <div class="row-span-1 flex justify-between items-center px-6 py-4">
-                <span class="text-lg">{{ meetingData.data.roomName }}</span>
+                <span class="text-lg">{{ meetingData.data.name }}</span>
                 <div class="flex gap-3">
                     <MediaToggleButton @toggle="handleMicroToggle" :is-enabled="isMicroEnabled">
                         <template #disabled>

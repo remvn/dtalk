@@ -2,15 +2,16 @@ import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 
 type MeetingData = {
-    roomId?: string
-    roomName?: string
+    id?: string
+    name?: string
     token?: string
+    createDate?: Date
 }
 
 export const useMeetingData = defineStore('meeting_data', () => {
     const data = reactive<MeetingData>({
-        roomId: '',
-        roomName: '',
+        id: '',
+        name: '',
         token: ''
     })
 

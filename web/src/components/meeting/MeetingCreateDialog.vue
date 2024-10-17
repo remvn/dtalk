@@ -24,7 +24,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { useForm } from 'vee-validate'
 import { useRouter } from 'vue-router'
-import { getResMessage } from '@/logic/fetching'
 import { errorToast } from '@/logic/toast'
 import { meetingFetch } from '@/logic/meeting-fetch'
 
@@ -46,14 +45,9 @@ const loading = ref(false)
 const onSubmit = form.handleSubmit(async (values) => {
     loading.value = true
     try {
-        const res = await meetingFetch.create({
+        const json = await meetingFetch.create({
             room_name: values.room_name
         })
-        if (!res.ok) {
-            errorToast(await getResMessage(res))
-            return
-        }
-        const json = await res.json()
         router.push(`/meeting/join?id=${json.room_id}`)
     } catch (e: any) {
         errorToast(e.message)

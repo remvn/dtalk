@@ -59,6 +59,8 @@ func (handler *MeetingHandler) Register(parentGroup *echo.Group) {
 	roomAuthGroup.POST("/accept", handler.accept)
 }
 
+// public routes
+
 type createMeetingDto struct {
 	RoomName string `json:"room_name"`
 }
@@ -66,8 +68,6 @@ type createMeetingDto struct {
 type createMeetingRes struct {
 	RoomID string `json:"room_id"`
 }
-
-// public routes
 
 func (handler *MeetingHandler) create(c echo.Context) error {
 	dto := &createMeetingDto{}
@@ -119,8 +119,10 @@ type joinMeetingDto struct {
 }
 
 type joinMeetingRes struct {
-	Message   string `json:"message,omitempty"`
-	RoomToken string `json:"room_token,omitempty"`
+	Message    string    `json:"message,omitempty"`
+	Token      string    `json:"token,omitempty"`
+	Name       string    `json:"name,omitempty"`
+	CreateDate time.Time `json:"create_date"`
 }
 
 func (handler *MeetingHandler) join(c echo.Context) error {
@@ -143,21 +145,17 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 
 	// room is just created, first one in will be the host
 	if meeting.Data.HostID() == "" {
-		token, err := handler.meetingService.GetJoinToken(meeting.Data.RoomID(), dtalk.JoinTokenParams{
-			ID:   userInfo.ID,
-			Name: userInfo.Name,
-		})
-		if err != nil {
-			return c.NoContent(http.StatusInternalServerError)
+		err = handler.sendJoinResponse(c, userInfo, meeting)
+		if err == nil {
+			log.Println("set new host id: ", userInfo.ID)
+			meeting.Data.SetHostID(userInfo.ID)
 		}
-		meeting.Data.SetHostID(userInfo.ID)
-		return c.JSON(http.StatusOK, joinMeetingRes{
-			RoomToken: token,
-		})
+		return err
 	}
 
 	resChan, err := handler.meetingService.AddJoinRequest(userInfo, meeting.Data.RoomID())
 	if err != nil {
+		logHandlerError(c, err)
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	_ = handler.meetingService.NotifyNewJoinRequest(meeting.Data.RoomID())
@@ -172,22 +170,33 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 	log.Println("result: ", accepted)
 
 	if accepted {
-		token, err := handler.meetingService.GetJoinToken(meeting.Data.RoomID(), dtalk.JoinTokenParams{
-			ID:   userInfo.ID,
-			Name: userInfo.Name,
-		})
-		if err != nil {
-			log.Println(err)
-			return c.NoContent(http.StatusInternalServerError)
-		}
-		return c.JSON(http.StatusOK, joinMeetingRes{
-			RoomToken: token,
-		})
+		err = handler.sendJoinResponse(c, userInfo, meeting)
+		return err
 	} else {
 		return c.JSON(http.StatusUnauthorized, joinMeetingRes{
 			Message: "Your join request gets rejected",
 		})
 	}
+}
+
+func (handler *MeetingHandler) sendJoinResponse(
+	c echo.Context,
+	userInfo *dtalk.UserTokenInfo,
+	meeting *dtalk.Meeting,
+) error {
+	token, err := handler.meetingService.GetJoinToken(meeting.Data.RoomID(), dtalk.JoinTokenParams{
+		ID:   userInfo.ID,
+		Name: userInfo.Name,
+	})
+	if err != nil {
+		logHandlerError(c, err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	return c.JSON(http.StatusOK, joinMeetingRes{
+		Token:      token,
+		Name:       meeting.Data.Name(),
+		CreateDate: meeting.Data.CreateDate(),
+	})
 }
 
 // auth & room protected routes

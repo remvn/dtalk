@@ -14,15 +14,15 @@ import {
     FormMessage
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { requestToken } from '@/logic/user-fetch'
 import { useUserInfo } from '@/stores/user-store'
 import { onMounted, ref } from 'vue'
 import { useMeetingData } from '@/stores/meeting-store'
 import { useRouter } from 'vue-router'
-import { getJSON, getResMessage } from '@/logic/fetching'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import { ReloadIcon } from '@radix-icons/vue'
 import { meetingFetch } from '@/logic/meeting-fetch'
+import { HTTPError } from 'ky'
+import { userFetch } from '@/logic/user-fetch'
 
 const props = defineProps({
     room_id: String
@@ -47,29 +47,28 @@ const errorMessage = ref('')
 const onSubmit = form.handleSubmit(async (values) => {
     loading.value = true
     try {
-        let json = await getJSON(requestToken({ name: values.name }))
-        userInfo.setInfo({ name: values.name, token: json.access_token })
-
-        const res = await meetingFetch.join({ room_id: props.room_id! })
-        if (!res.ok) {
-            errorMessage.value = await getResMessage(res)
-            return
+        const tokenJson = await userFetch.requestToken({ name: values.name })
+        userInfo.data = {
+            name: values.name,
+            token: tokenJson.access_token
         }
-        json = await res.json()
+
+        const json = await meetingFetch.join({ room_id: props.room_id! })
         meetingData.data = {
-            token: json.room_token,
-            roomId: props.room_id!
+            id: json.id,
+            name: json.name,
+            token: json.token,
+            createDate: json.create_date
         }
         router.push('/meeting/room')
     } catch (e: any) {
-        console.log(e)
-        errorMessage.value = e.message
+        if (e instanceof HTTPError) errorMessage.value = e.message
     } finally {
         loading.value = false
     }
 })
 
-const roomName = ref('')
+const meetingName = ref('TODO')
 onMounted(() => {})
 </script>
 
@@ -78,7 +77,7 @@ onMounted(() => {})
     <div class="flex-grow flex justify-center items-center">
         <div class="px-4">
             <h1 class="scroll-m-20 text-4xl tracking-tight lg:text-5xl">
-                Join meeting: {TODO room's name}
+                Join meeting: {{ meetingName }}
             </h1>
             <form class="space-y-6 pt-6" @submit="onSubmit">
                 <FormField v-slot="{ componentField }" name="name">
@@ -98,7 +97,7 @@ onMounted(() => {})
                 <Button type="submit" :disabled="loading">
                     <template v-if="loading">
                         <ReloadIcon class="w-4 h-4 mr-2 animate-spin" />
-                        Waiting for the host acceptance...
+                        Waiting for the host approval...
                     </template>
                     <template v-else> Join Meeting </template>
                 </Button>

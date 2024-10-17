@@ -2,34 +2,19 @@ import { getAPIBaseURL } from '@/lib/config'
 import { useUserInfo } from '@/stores/user-store'
 import type { HTTPError, Hooks } from 'ky'
 
-export const defaultHeaders = {
-    'Content-Type': 'application/json'
-}
-
-export function getAuthHeader(headers = defaultHeaders) {
+export function getAuthHeader() {
     const userInfo = useUserInfo()
     return {
-        ...headers,
-        Authorization: `Bearer ${userInfo.info.token}`
+        Authorization: `Bearer ${userInfo.data.token}`
     }
 }
 
-export function getURL(url: string, params?: any) {
-    if (params != null) {
-        const paramStr = new URLSearchParams(params).toString()
-        url += `?${paramStr}`
-    }
-    const fullURL = new URL(url, getAPIBaseURL())
-    return fullURL.href
+export function getURL(url: string) {
+    const urlObj = new URL(url, getAPIBaseURL())
+    return urlObj.href
 }
 
-export async function getJSON(promise: Promise<Response>) {
-    const res = await promise
-    const json = await res.json()
-    return json
-}
-
-export async function getResMessage(res: Response) {
+async function getResMessage(res: Response) {
     let text = ''
     try {
         text = await res.text()

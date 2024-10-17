@@ -3,6 +3,7 @@ package dtalk
 import (
 	"errors"
 	"sync"
+	"time"
 )
 
 var ErrRoomNotReady = errors.New("This room is not ready")
@@ -21,6 +22,7 @@ type MeetingData struct {
 	name           string
 	roomID         string
 	hostID         string
+	createDate     time.Time
 	joinRequestMap map[string]*MeetingJoinRequest
 }
 
@@ -48,6 +50,12 @@ func (data *MeetingData) HostID() string {
 	data.m.RLock()
 	defer data.m.RUnlock()
 	return data.hostID
+}
+
+func (data *MeetingData) CreateDate() time.Time {
+	data.m.RLock()
+	defer data.m.RUnlock()
+	return data.createDate
 }
 
 func (data *MeetingData) ListJoinRequesters() []*UserTokenInfo {
@@ -102,6 +110,7 @@ func NewMeetingData(roomID, name, hostID string) *MeetingData {
 		roomID:         roomID,
 		name:           name,
 		hostID:         hostID,
+		createDate:     time.Now(),
 		joinRequestMap: make(map[string]*MeetingJoinRequest),
 	}
 }
