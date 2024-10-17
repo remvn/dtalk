@@ -214,6 +214,7 @@ type acceptRequestDto struct {
 func (handler *MeetingHandler) accept(c echo.Context) error {
 	dto := &acceptRequestDto{}
 	if err := c.Bind(dto); err != nil {
+		//TODO: fix read Body twice
 		logHandlerError(c, err)
 		return c.NoContent(http.StatusBadRequest)
 	}
