@@ -1,5 +1,6 @@
 import './assets/index.css'
 import './assets/base.css'
+import 'overlayscrollbars/styles/overlayscrollbars.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'

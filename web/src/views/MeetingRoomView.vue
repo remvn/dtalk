@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getLkServerURL } from '@/lib/config'
+import { getLkServerURL } from '@/config/config'
 import { Meeting, type MeetingRenderMap } from '@/logic/meeting-service'
 import { useMeetingData } from '@/stores/meeting-store'
 import { onBeforeUnmount, onMounted, provide, ref, shallowRef } from 'vue'
@@ -16,6 +16,7 @@ import { MeetingTabComposableKey } from '@/types/meeting'
 import { useTwBreakpoints } from '@/hooks/use-tw-breakpoints'
 import { useMeetingTab } from '@/hooks/use-meeting-tab'
 import MeetingTabToggleBar from '@/components/meeting/MeetingTabToggleBar.vue'
+import MeetingRoomHeader from '@/components/meeting/MeetingRoomHeader.vue'
 
 const meetingData = useMeetingData()
 const renderMap = shallowRef<MeetingRenderMap>(new Map())
@@ -111,12 +112,15 @@ const iconClass = 'size-6'
                         ></audio>
                     </div>
                 </div>
-                <div v-if="meetingTab.state.value.isDrawerOpen" class="w-[358px] p-4 flex-shrink-0">
+                <div
+                    v-if="meetingTab.state.value.isDrawerOpen"
+                    class="w-[358px] h-full p-4 flex-shrink-0"
+                >
                     <MeetingTab></MeetingTab>
                 </div>
             </div>
             <div class="row-span-1 flex justify-between items-center px-6 py-4">
-                <span class="text-lg">{{ meetingData.data.name }}</span>
+                <MeetingRoomHeader></MeetingRoomHeader>
                 <div class="flex gap-3">
                     <MediaToggleButton @toggle="handleMicroToggle" :is-enabled="isMicroEnabled">
                         <template #disabled>

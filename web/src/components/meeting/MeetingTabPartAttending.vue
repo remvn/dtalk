@@ -20,7 +20,7 @@ const count = computed(() => {
             <span class="font-light ml-2"> Attending </span>
             <Badge class="ml-2">{{ count }}</Badge>
         </div>
-        <div v-if="isSuccess">
+        <div v-if="isSuccess" class="space-y-2">
             <div v-for="item in data" :key="item.id" class="flex items-center gap-2">
                 <ParticipantAvatar :name="item.name"></ParticipantAvatar>
                 <span>{{ item.name }}</span>

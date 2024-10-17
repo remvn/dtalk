@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TabsContent } from '@/components/ui/tabs'
-import MeetingTabPartJoinRequest from '@/components/meeting/MeetingTabPartJoinRequest.vue'
+import MeetingTabPartWaiting from '@/components/meeting/MeetingTabPartWaiting.vue'
 import MeetingTabPartAttending from '@/components/meeting/MeetingTabPartAttending.vue'
 import MeetingInviteDialog from './MeetingInviteDialog.vue'
 import { Button } from '@/components/ui/button'
 import MdiAccountPlusOutline from '~icons/mdi/account-plus-outline'
+import OverlayScroll from '@/components/OverlayScroll.vue'
 </script>
 
 <template>
     <TabsContent value="participant" class="h-full">
-        <Card class="h-full">
-            <CardHeader>
+        <Card class="h-full flex flex-col overflow-hidden">
+            <CardHeader class="flex-shrink-0">
                 <CardTitle class="text-lg">Participants</CardTitle>
                 <CardDescription>
                     <MeetingInviteDialog>
@@ -22,10 +23,13 @@ import MdiAccountPlusOutline from '~icons/mdi/account-plus-outline'
                     </MeetingInviteDialog>
                 </CardDescription>
             </CardHeader>
-            <CardContent class="space-y-3">
-                <MeetingTabPartJoinRequest></MeetingTabPartJoinRequest>
-                <MeetingTabPartAttending></MeetingTabPartAttending>
-            </CardContent>
+            <OverlayScroll class="flex-grow basis-0">
+                <CardContent class="space-y-6">
+                    <MeetingTabPartWaiting></MeetingTabPartWaiting>
+                    <MeetingTabPartAttending></MeetingTabPartAttending>
+                    <div class="h-[800px]"></div>
+                </CardContent>
+            </OverlayScroll>
         </Card>
     </TabsContent>
 </template>

@@ -58,7 +58,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             id: json.id,
             name: json.name,
             token: json.token,
-            createDate: json.create_date
+            createDate: new Date(json.create_date)
         }
         router.push('/meeting/room')
     } catch (e: any) {

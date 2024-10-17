@@ -119,9 +119,13 @@ type joinMeetingDto struct {
 }
 
 type joinMeetingRes struct {
-	Message    string    `json:"message,omitempty"`
-	Token      string    `json:"token,omitempty"`
+	// error message
+	Message string `json:"message,omitempty"`
+
+	// meeting's data
+	ID         string    `json:"id,omitempty"`
 	Name       string    `json:"name,omitempty"`
+	Token      string    `json:"token,omitempty"`
 	CreateDate time.Time `json:"create_date"`
 }
 
@@ -147,7 +151,6 @@ func (handler *MeetingHandler) join(c echo.Context) error {
 	if meeting.Data.HostID() == "" {
 		err = handler.sendJoinResponse(c, userInfo, meeting)
 		if err == nil {
-			log.Println("set new host id: ", userInfo.ID)
 			meeting.Data.SetHostID(userInfo.ID)
 		}
 		return err
@@ -193,9 +196,10 @@ func (handler *MeetingHandler) sendJoinResponse(
 		return c.NoContent(http.StatusInternalServerError)
 	}
 	return c.JSON(http.StatusOK, joinMeetingRes{
-		Token:      token,
+		ID:         meeting.Data.RoomID(),
 		Name:       meeting.Data.Name(),
 		CreateDate: meeting.Data.CreateDate(),
+		Token:      token,
 	})
 }
 
@@ -210,6 +214,7 @@ type acceptRequestDto struct {
 func (handler *MeetingHandler) accept(c echo.Context) error {
 	dto := &acceptRequestDto{}
 	if err := c.Bind(dto); err != nil {
+		logHandlerError(c, err)
 		return c.NoContent(http.StatusBadRequest)
 	}
 

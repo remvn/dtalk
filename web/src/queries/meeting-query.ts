@@ -17,12 +17,12 @@ function useJoinRequests() {
 }
 
 function useParticipants() {
-    const data = useMeetingData()
+    const meetingData = useMeetingData()
     const query = useQuery({
-        queryKey: ['participants', data.data.id],
+        queryKey: ['participants', meetingData.data.id],
         queryFn: () => {
             return meetingFetch.listParticipants({
-                room_id: data.data.id!
+                room_id: meetingData.data.id!
             })
         }
     })

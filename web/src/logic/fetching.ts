@@ -1,4 +1,4 @@
-import { getAPIBaseURL } from '@/lib/config'
+import { getAPIBaseURL } from '@/config/config'
 import { useUserInfo } from '@/stores/user-store'
 import type { HTTPError, Hooks } from 'ky'
 

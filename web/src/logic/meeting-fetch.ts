@@ -61,10 +61,21 @@ function listJoinRequesters(params: { room_id: string }) {
         .json()
 }
 
+function accept(body: { room_id: string; requester_id: string; accepted: boolean }) {
+    return ky
+        .post(getURL('/api/meeting/accept'), {
+            json: body,
+            hooks: defaultKyHooks,
+            headers: getAuthHeader()
+        })
+        .json()
+}
+
 export const meetingFetch = {
     create,
     publicData,
     join,
     listParticipants,
-    listJoinRequesters
+    listJoinRequesters,
+    accept
 }
