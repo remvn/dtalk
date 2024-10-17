@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Tabs } from '@/components/ui/tabs'
-import MeetingTabParticipant from '@/components/meeting/MeetingTabParticipant.vue'
+import MeetingTabPart from '@/components/meeting/MeetingTabPart.vue'
 import { inject } from 'vue'
 import { MeetingTabComposableKey } from '@/types/meeting'
 import MeetingTabChat from '@/components/meeting/MeetingTabChat.vue'
@@ -10,7 +10,7 @@ const meetingTab = inject(MeetingTabComposableKey)!
 
 <template>
     <Tabs v-model="meetingTab.state.value.selectedTab" class="w-full h-full">
-        <MeetingTabParticipant></MeetingTabParticipant>
+        <MeetingTabPart></MeetingTabPart>
         <MeetingTabChat></MeetingTabChat>
     </Tabs>
 </template>
