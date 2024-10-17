@@ -13,8 +13,8 @@ import { meetingFetch } from '@/logic/meeting-fetch'
 import { useMeetingData } from '@/stores/meeting-store'
 import { useQuery } from '@tanstack/vue-query'
 import { computed } from 'vue'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import ErrorAlert from '@/components/ErrorAlert.vue'
+import ParticipantAvatar from '@/components/ParticipantAvatar.vue'
 
 const meetingData = useMeetingData()
 
@@ -63,9 +63,7 @@ const participantsQuery = useQuery({
                                 class="flex items-center justify-between"
                             >
                                 <div class="flex items-center gap-2">
-                                    <Avatar>
-                                        <AvatarFallback>{{ item.name[0] }}</AvatarFallback>
-                                    </Avatar>
+                                    <ParticipantAvatar :name="item.name"></ParticipantAvatar>
                                     <span>{{ item.name }}</span>
                                 </div>
                                 <Button size="sm" variant="outline">Accept</Button>
@@ -85,14 +83,12 @@ const participantsQuery = useQuery({
                             :key="item.id"
                             class="flex items-center gap-2"
                         >
-                            <Avatar>
-                                <AvatarFallback>{{ item.name[0] }}</AvatarFallback>
-                            </Avatar>
+                            <ParticipantAvatar :name="item.name"></ParticipantAvatar>
                             <span>{{ item.name }}</span>
                         </div>
                     </div>
                     <ErrorAlert
-                        v-if="participantsQuery.status.value === 'error'"
+                        v-if="participantsQuery.isError.value"
                         :message="participantsQuery.error.value?.message"
                     ></ErrorAlert>
                 </div>
