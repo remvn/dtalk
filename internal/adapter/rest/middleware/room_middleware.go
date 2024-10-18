@@ -37,6 +37,7 @@ func (m *RoomAuth) Func(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.NoContent(http.StatusInternalServerError)
 		}
 		c.Request().Body = io.NopCloser(bytes.NewReader(raw))
+
 		// log.Println("RoomAuth middleware body:", string(raw))
 		jsonErr := json.Unmarshal(raw, dto)
 		paramsErr := (&echo.DefaultBinder{}).BindQueryParams(c, dto)

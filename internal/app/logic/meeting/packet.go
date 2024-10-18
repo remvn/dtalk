@@ -16,12 +16,12 @@ type packet struct {
 
 type pendingJoinRequestPacket struct {
 	packet
-	PendingCount int `json:"pending_count"`
+	TotalCount int `json:"total_count"`
 }
 
-func NewPendingJoinRequestPacket(pendingCount int) pendingJoinRequestPacket {
+func NewPendingJoinRequestPacket(totalCount int) pendingJoinRequestPacket {
 	return pendingJoinRequestPacket{
-		packet:       packet{"new_join_request"},
-		PendingCount: pendingCount,
+		packet:     packet{"new_join_request"},
+		TotalCount: totalCount,
 	}
 }

@@ -1,6 +1,7 @@
 import type { QueryClient } from '@tanstack/vue-query'
 import type { Room } from 'livekit-client'
 import type { MeetingRenderer } from '@/logic/meeting/meeting-renderer'
+import { meetingQuery } from '@/queries/meeting-query'
 
 type Params = {
     room: Room
@@ -23,8 +24,15 @@ export class MeetingMessenger {
         if (json.kind == null) return
         switch (json.kind) {
             case 'new_join_request': {
+                this.handleNewJoinRequest(json)
                 break
             }
         }
+    }
+
+    handleNewJoinRequest(json: { total_count: number }) {
+        this.queryClient.invalidateQueries({
+            queryKey: [...meetingQuery.keys.joinRequest, this.room.name]
+        })
     }
 }
