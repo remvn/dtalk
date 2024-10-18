@@ -20,7 +20,7 @@ import { useMeetingData } from '@/stores/meeting-store'
 import { useRouter } from 'vue-router'
 import ErrorAlert from '@/components/ErrorAlert.vue'
 import { ReloadIcon } from '@radix-icons/vue'
-import { meetingFetch } from '@/logic/meeting-fetch'
+import { meetingFetch } from '@/logic/meeting/meeting-fetch'
 import { HTTPError } from 'ky'
 import { userFetch } from '@/logic/user-fetch'
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { meetingFetch } from '@/logic/meeting-fetch'
+import { meetingFetch } from '@/logic/meeting/meeting-fetch'
 import { useMeetingData } from '@/stores/meeting-store'
 import ParticipantAvatar from '../ParticipantAvatar.vue'
 import type { User } from '@/types/user'

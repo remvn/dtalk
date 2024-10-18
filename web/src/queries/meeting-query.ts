@@ -1,4 +1,4 @@
-import { meetingFetch } from '@/logic/meeting-fetch'
+import { meetingFetch } from '@/logic/meeting/meeting-fetch'
 import { useMeetingData } from '@/stores/meeting-store'
 import { useQuery } from '@tanstack/vue-query'
 

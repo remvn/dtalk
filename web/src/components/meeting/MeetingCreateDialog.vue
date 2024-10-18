@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input'
 import { useForm } from 'vee-validate'
 import { useRouter } from 'vue-router'
 import { errorToast } from '@/logic/toast'
-import { meetingFetch } from '@/logic/meeting-fetch'
+import { meetingFetch } from '@/logic/meeting/meeting-fetch'
 
 const isOpen = ref(false)
 

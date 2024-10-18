@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { getLkServerURL } from '@/config/config'
-import { Meeting, type MeetingRenderMap } from '@/logic/meeting-service'
 import { useMeetingData } from '@/stores/meeting-store'
 import { onBeforeUnmount, onMounted, provide, ref, shallowRef } from 'vue'
 import { useThrottleFn } from '@vueuse/core'
@@ -18,6 +17,8 @@ import { useMeetingTab } from '@/hooks/use-meeting-tab'
 import MeetingTabToggleBar from '@/components/meeting/MeetingTabToggleBar.vue'
 import MeetingRoomHeader from '@/components/meeting/MeetingRoomHeader.vue'
 import { useQueryClient } from '@tanstack/vue-query'
+import { Meeting } from '@/logic/meeting/meeting-service'
+import type { MeetingRenderMap } from '@/logic/meeting/meeting-renderer'
 
 const meetingData = useMeetingData()
 const renderMap = shallowRef<MeetingRenderMap>(new Map())

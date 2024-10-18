@@ -1,5 +1,5 @@
 import ky from 'ky'
-import { defaultKyHooks, getAuthHeader, getURL } from './fetching'
+import { defaultKyHooks, getAuthHeader, getURL } from '@/logic/fetching'
 import type { User } from '@/types/user'
 
 function create(body: { room_name: string }) {

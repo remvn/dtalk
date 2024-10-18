@@ -1,6 +1,6 @@
 import type { QueryClient } from '@tanstack/vue-query'
 import type { Room } from 'livekit-client'
-import type { MeetingRenderer } from './meeting-renderer'
+import type { MeetingRenderer } from '@/logic/meeting/meeting-renderer'
 
 type Params = {
     room: Room

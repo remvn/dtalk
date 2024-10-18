@@ -15,8 +15,8 @@ import {
     DataPacket_Kind
 } from 'livekit-client'
 import { type ShallowRef } from 'vue'
-import { MeetingMessenger } from './meeting/meeting-messenger'
-import { MeetingRenderer, type MeetingRenderMap } from './meeting/meeting-renderer'
+import { MeetingMessenger } from '@/logic/meeting/meeting-messenger'
+import { MeetingRenderer, type MeetingRenderMap } from '@/logic/meeting/meeting-renderer'
 
 type Params = {
     url: string
