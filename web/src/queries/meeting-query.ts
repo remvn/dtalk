@@ -2,14 +2,19 @@ import { meetingFetch } from '@/logic/meeting-fetch'
 import { useMeetingData } from '@/stores/meeting-store'
 import { useQuery } from '@tanstack/vue-query'
 
+const keys = {
+    joinRequest: ['meeting', 'join-requests'],
+    participants: ['meeting', 'participants']
+}
+
 function useJoinRequests() {
-    const data = useMeetingData()
+    const meetingData = useMeetingData()
     const query = useQuery({
-        queryKey: ['join-requesters', data.data.id],
+        queryKey: [...keys.joinRequest, meetingData.data.id],
         retry: false,
         queryFn: () => {
             return meetingFetch.listJoinRequesters({
-                room_id: data.data.id!
+                room_id: meetingData.data.id!
             })
         }
     })
@@ -19,7 +24,7 @@ function useJoinRequests() {
 function useParticipants() {
     const meetingData = useMeetingData()
     const query = useQuery({
-        queryKey: ['participants', meetingData.data.id],
+        queryKey: [...keys.participants, meetingData.data.id],
         queryFn: () => {
             return meetingFetch.listParticipants({
                 room_id: meetingData.data.id!
@@ -30,6 +35,7 @@ function useParticipants() {
 }
 
 export const meetingQuery = {
+    keys,
     useJoinRequests,
     useParticipants
 }

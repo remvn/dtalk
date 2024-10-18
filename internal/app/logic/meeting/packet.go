@@ -21,7 +21,7 @@ type pendingJoinRequestPacket struct {
 
 func NewPendingJoinRequestPacket(pendingCount int) pendingJoinRequestPacket {
 	return pendingJoinRequestPacket{
-		packet:       packet{"new_meeting_join_request"},
+		packet:       packet{"new_join_request"},
 		PendingCount: pendingCount,
 	}
 }

@@ -17,14 +17,17 @@ import { useTwBreakpoints } from '@/hooks/use-tw-breakpoints'
 import { useMeetingTab } from '@/hooks/use-meeting-tab'
 import MeetingTabToggleBar from '@/components/meeting/MeetingTabToggleBar.vue'
 import MeetingRoomHeader from '@/components/meeting/MeetingRoomHeader.vue'
+import { useQueryClient } from '@tanstack/vue-query'
 
 const meetingData = useMeetingData()
 const renderMap = shallowRef<MeetingRenderMap>(new Map())
+const queryClient = useQueryClient()
 
 const meeting = new Meeting({
     token: meetingData.data.token!,
     url: getLkServerURL(),
     renderMap: renderMap,
+    queryClient: queryClient,
     setGridSize: setGridSize
 })
 
@@ -58,7 +61,6 @@ async function handleCameraToggle() {
     const participant = meeting.room.localParticipant
     await participant.setCameraEnabled(!participant.isCameraEnabled)
     isCameraEnabled.value = participant.isCameraEnabled
-    meeting.rerenderGrid()
 }
 
 const isMicroEnabled = ref(false)
@@ -77,7 +79,7 @@ onMounted(async () => {
     meeting.setListener()
     await meeting.connect()
 
-    meeting.rerenderGrid()
+    meeting.renderer.renderGrid()
 
     window.addEventListener('resize', handleWindowResize)
 })

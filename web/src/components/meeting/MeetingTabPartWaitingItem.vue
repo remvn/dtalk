@@ -6,21 +6,27 @@ import type { User } from '@/types/user'
 import { ref } from 'vue'
 import { errorToast } from '@/logic/toast'
 import { Button } from '@/components/ui/button'
+import { useQueryClient } from '@tanstack/vue-query'
+import { meetingQuery } from '@/queries/meeting-query'
 
 const { user } = defineProps<{
     user: User
 }>()
 
+const queryClient = useQueryClient()
 const meetingData = useMeetingData()
 const isLoading = ref(false)
 
 async function handleAccept() {
     isLoading.value = true
     try {
-        meetingFetch.accept({
+        await meetingFetch.accept({
             room_id: meetingData.data.id!,
             accepted: true,
             requester_id: user.id
+        })
+        queryClient.invalidateQueries({
+            queryKey: [...meetingQuery.keys.joinRequest, meetingData.data.id]
         })
     } catch (e: any) {
         errorToast(e.message)
