@@ -64,7 +64,25 @@ export class Meeting {
     }
 
     async connect() {
-        await this.room.connect(this.url, this.token)
+        // const googleIceServer: RTCIceServer = {
+        //     urls: [
+        //         'stun:stun.l.google.com:19302',
+        //         'stun:stun.l.google.com:5349',
+        //         'stun:stun1.l.google.com:3478',
+        //         'stun:stun1.l.google.com:5349',
+        //         'stun:stun2.l.google.com:19302',
+        //         'stun:stun2.l.google.com:5349',
+        //         'stun:stun3.l.google.com:3478',
+        //         'stun:stun3.l.google.com:5349',
+        //         'stun:stun4.l.google.com:19302',
+        //         'stun:stun4.l.google.com:5349'
+        //     ]
+        // }
+        await this.room.connect(this.url, this.token, {
+            // rtcConfig: {
+            //     iceServers: [googleIceServer]
+            // }
+        })
     }
 
     async disconnect() {
