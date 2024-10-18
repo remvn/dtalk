@@ -73,3 +73,7 @@ func (m *Auth) extract() echo.MiddlewareFunc {
 		}
 	}
 }
+
+func (m *Auth) Name() string {
+	return "Auth"
+}
