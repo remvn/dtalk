@@ -20,8 +20,10 @@ import { useQueryClient } from '@tanstack/vue-query'
 import { Meeting } from '@/logic/meeting/meeting-service'
 import type { MeetingRenderMap } from '@/logic/meeting/meeting-renderer'
 import { useRouter } from 'vue-router'
+import { useUserInfo } from '@/stores/user-store'
 
 const router = useRouter()
+const userInfo = useUserInfo()
 const meetingData = useMeetingData()
 const renderMap = shallowRef<MeetingRenderMap>(new Map())
 const queryClient = useQueryClient()
@@ -75,7 +77,9 @@ async function handleMicroToggle() {
 
 async function handleDisconnect() {
     meeting.room.disconnect()
+    console.log(`resetting states`)
     meetingData.$reset()
+    userInfo.$reset()
     router.push('/')
 }
 

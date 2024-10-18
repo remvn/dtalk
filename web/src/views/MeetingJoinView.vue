@@ -49,10 +49,12 @@ const errorMessage = ref('')
 const onSubmit = form.handleSubmit(async (values) => {
     loading.value = true
     try {
-        const tokenJson = await userFetch.requestToken({ name: values.name })
-        userInfo.data = {
-            name: values.name,
-            token: tokenJson.access_token
+        if (userInfo.data.token == null) {
+            const tokenJson = await userFetch.requestToken({ name: values.name })
+            userInfo.data = {
+                name: values.name,
+                token: tokenJson.access_token
+            }
         }
 
         const json = await meetingFetch.join({ room_id: props.room_id! })
