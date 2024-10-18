@@ -9,11 +9,14 @@ type MeetingData = {
 }
 
 export const useMeetingData = defineStore('meeting_data', () => {
-    const data = reactive<MeetingData>({
-        id: '',
-        name: '',
-        token: ''
-    })
+    const data = reactive<MeetingData>({})
 
-    return { data }
+    function $reset() {
+        data.id = undefined
+        data.name = undefined
+        data.token = undefined
+        data.createDate = undefined
+    }
+
+    return { data, $reset }
 })

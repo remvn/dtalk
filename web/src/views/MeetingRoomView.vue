@@ -19,7 +19,9 @@ import MeetingRoomHeader from '@/components/meeting/MeetingRoomHeader.vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import { Meeting } from '@/logic/meeting/meeting-service'
 import type { MeetingRenderMap } from '@/logic/meeting/meeting-renderer'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const meetingData = useMeetingData()
 const renderMap = shallowRef<MeetingRenderMap>(new Map())
 const queryClient = useQueryClient()
@@ -71,14 +73,28 @@ async function handleMicroToggle() {
     isMicroEnabled.value = participant.isMicrophoneEnabled
 }
 
-async function handleDisconnect() {}
+async function handleDisconnect() {
+    meeting.room.disconnect()
+    meetingData.$reset()
+    router.push('/')
+}
 
 const meetingTab = useMeetingTab()
 provide(MeetingTabComposableKey, meetingTab)
 
 onMounted(async () => {
+    if (meetingData.data.id == null) {
+        console.log('meeting data is undefined')
+        router.push('/')
+        return
+    }
     meeting.setListener()
-    await meeting.connect()
+    try {
+        await meeting.connect()
+    } catch (e) {
+        console.log('unable to connect')
+        router.push('/')
+    }
 
     meeting.renderer.renderGrid()
 

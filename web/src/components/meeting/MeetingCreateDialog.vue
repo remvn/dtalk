@@ -19,6 +19,9 @@ import { useForm } from 'vee-validate'
 import { useRouter } from 'vue-router'
 import { errorToast } from '@/logic/toast'
 import { meetingFetch } from '@/logic/meeting/meeting-fetch'
+import MdiVideoPlusOutline from '~icons/mdi/video-plus-outline'
+import MdiArrowRight from '~icons/mdi/arrow-right'
+import { ReloadIcon } from '@radix-icons/vue'
 
 const isOpen = ref(false)
 
@@ -54,7 +57,10 @@ const onSubmit = form.handleSubmit(async (values) => {
 <template>
     <Dialog v-model:open="isOpen">
         <DialogTrigger as-child>
-            <Button size="lg" variant="outline">Create meeting</Button>
+            <Button size="lg" variant="outline">
+                <MdiVideoPlusOutline class="size-5 mr-2"></MdiVideoPlusOutline>
+                New meeting
+            </Button>
         </DialogTrigger>
         <DialogContent class="sm:max-w-[425px]">
             <DialogHeader>
@@ -80,8 +86,14 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <DialogFooter>
                 <Button @click="onSubmit" :disabled="loading">
-                    <template v-if="loading">Creating...</template>
-                    <template v-else>Create</template>
+                    <template v-if="loading">
+                        <ReloadIcon class="size-4 mr-2 animate-spin" />
+                        Creating...
+                    </template>
+                    <template v-else>
+                        Create
+                        <MdiArrowRight class="size-4 ml-2"></MdiArrowRight>
+                    </template>
                 </Button>
             </DialogFooter>
         </DialogContent>

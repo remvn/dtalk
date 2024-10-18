@@ -23,6 +23,8 @@ import { ReloadIcon } from '@radix-icons/vue'
 import { meetingFetch } from '@/logic/meeting/meeting-fetch'
 import { HTTPError } from 'ky'
 import { userFetch } from '@/logic/user-fetch'
+import MdiArrowRight from '~icons/mdi/arrow-right'
+import MdiArrowLeft from '~icons/mdi/arrow-left'
 
 const props = defineProps({
     room_id: String
@@ -68,14 +70,29 @@ const onSubmit = form.handleSubmit(async (values) => {
     }
 })
 
+function handleGoBack() {
+    router.push('/')
+}
+
 const meetingName = ref('TODO')
-onMounted(() => {})
+onMounted(async () => {
+    if (props.room_id == null) {
+        router.push('/')
+        return
+    }
+    try {
+        const json = await meetingFetch.publicData({ room_id: props.room_id })
+        meetingName.value = json.name
+    } catch (e: any) {
+        errorMessage.value = `Unable to retrieve meeting's information`
+    }
+})
 </script>
 
 <template>
-    <NavBar></NavBar>
+    <!-- <NavBar></NavBar> -->
     <div class="flex-grow flex justify-center items-center">
-        <div class="px-4">
+        <div class="px-4 max-w-md">
             <h1 class="scroll-m-20 text-4xl tracking-tight lg:text-5xl">
                 Join meeting: {{ meetingName }}
             </h1>
@@ -94,14 +111,23 @@ onMounted(() => {})
                         <FormMessage />
                     </FormItem>
                 </FormField>
-                <Button type="submit" :disabled="loading">
-                    <template v-if="loading">
-                        <ReloadIcon class="w-4 h-4 mr-2 animate-spin" />
-                        Waiting for the host approval...
-                    </template>
-                    <template v-else> Join Meeting </template>
-                </Button>
                 <ErrorAlert :message="errorMessage"></ErrorAlert>
+                <div class="flex items-center justify-between">
+                    <Button @click="handleGoBack" variant="outline">
+                        <MdiArrowLeft class="size-4 mr-2"></MdiArrowLeft>
+                        Go back
+                    </Button>
+                    <Button type="submit" :disabled="loading">
+                        <template v-if="loading">
+                            <ReloadIcon class="size-4 mr-2 animate-spin" />
+                            Waiting for the host approval...
+                        </template>
+                        <template v-else>
+                            Join Meeting
+                            <MdiArrowRight class="size-4 ml-2"></MdiArrowRight>
+                        </template>
+                    </Button>
+                </div>
             </form>
         </div>
     </div>

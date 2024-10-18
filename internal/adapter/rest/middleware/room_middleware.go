@@ -36,6 +36,9 @@ func (m *RoomAuth) Func(next echo.HandlerFunc) echo.HandlerFunc {
 			logMiddlewareErr(c, m, err)
 			return c.NoContent(http.StatusInternalServerError)
 		}
+		// httpserver will automatically close original
+		// body, even when we re-assign with a new one (unchecked).
+		// No need to close it here
 		c.Request().Body = io.NopCloser(bytes.NewReader(raw))
 
 		// log.Println("RoomAuth middleware body:", string(raw))
