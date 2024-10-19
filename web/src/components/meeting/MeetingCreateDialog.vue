@@ -62,7 +62,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                 New meeting
             </Button>
         </DialogTrigger>
-        <DialogContent class="sm:max-w-[425px]">
+        <DialogContent class="sm:max-w-[400px]">
             <DialogHeader>
                 <DialogTitle>Create a new meeting</DialogTitle>
                 <DialogDescription> </DialogDescription>

@@ -18,11 +18,7 @@ export function useMeetingTab() {
             }
             state.value.isDrawerOpen = true
         } else {
-            if (state.value.isDialogOpen && state.value.selectedTab === name) {
-                state.value.isDialogOpen = false
-                return
-            }
-            state.value.isDialogOpen = true
+            state.value.isDialogOpen = !state.value.isDialogOpen
         }
         state.value.selectedTab = name
     }

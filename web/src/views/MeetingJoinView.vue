@@ -101,43 +101,50 @@ onMounted(async () => {
 <template>
     <!-- <NavBar></NavBar> -->
     <div class="flex-grow flex justify-center items-center">
-        <div class="px-4 max-w-md">
-            <h1 class="scroll-m-20 text-4xl tracking-tight lg:text-5xl">
-                Join meeting: {{ meetingName }}
-            </h1>
-            <form class="space-y-6 pt-6" @submit="onSubmit">
-                <FormField v-slot="{ componentField }" name="name">
-                    <FormItem>
-                        <FormLabel>Join under name: </FormLabel>
-                        <FormControl>
-                            <Input
-                                type="text"
-                                placeholder="Enter your display name"
-                                v-bind="componentField"
-                            />
-                        </FormControl>
-                        <FormDescription>Other people will see this as your name.</FormDescription>
-                        <FormMessage />
-                    </FormItem>
-                </FormField>
-                <ErrorAlert :message="errorMessage"></ErrorAlert>
-                <div class="flex items-center justify-between">
-                    <Button @click="handleGoBack" variant="outline">
-                        <MdiArrowLeft class="size-4 mr-2"></MdiArrowLeft>
-                        Go back
-                    </Button>
-                    <Button type="submit" :disabled="loading">
-                        <template v-if="loading">
-                            <ReloadIcon class="size-4 mr-2 animate-spin" />
-                            Waiting for the host approval...
-                        </template>
-                        <template v-else>
-                            Join Meeting
-                            <MdiArrowRight class="size-4 ml-2"></MdiArrowRight>
-                        </template>
-                    </Button>
+        <div class="p-4 w-full sm:w-[440px]">
+            <div class="p-6 border border-secondary rounded-lg">
+                <div>
+                    <span class="font-thin text-muted-foreground">Join meeting: </span>
+                    <h1 class="scroll-m-20 text-4xl tracking-tight lg:text-5xl">
+                        {{ meetingName }}
+                    </h1>
                 </div>
-            </form>
+                <form class="space-y-6 pt-6" @submit="onSubmit">
+                    <FormField v-slot="{ componentField }" name="name">
+                        <FormItem>
+                            <FormLabel>Join under name: </FormLabel>
+                            <FormControl>
+                                <Input
+                                    type="text"
+                                    placeholder="Enter your display name"
+                                    v-bind="componentField"
+                                />
+                            </FormControl>
+                            <FormDescription
+                                >Other people will see this as your name.</FormDescription
+                            >
+                            <FormMessage />
+                        </FormItem>
+                    </FormField>
+                    <ErrorAlert :message="errorMessage"></ErrorAlert>
+                    <div class="flex items-center justify-between">
+                        <Button @click="handleGoBack" variant="outline">
+                            <MdiArrowLeft class="size-4 mr-2"></MdiArrowLeft>
+                            Go back
+                        </Button>
+                        <Button type="submit" :disabled="loading">
+                            <template v-if="loading">
+                                <ReloadIcon class="size-4 mr-2 animate-spin" />
+                                Waiting for the host approval...
+                            </template>
+                            <template v-else>
+                                Join Meeting
+                                <MdiArrowRight class="size-4 ml-2"></MdiArrowRight>
+                            </template>
+                        </Button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </template>

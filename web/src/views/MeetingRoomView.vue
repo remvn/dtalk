@@ -133,8 +133,9 @@ const iconClass = 'size-6'
                 </div>
                 <MeetingTabDrawer></MeetingTabDrawer>
             </div>
+            <!-- horizontal scroll for toggler bar  -->
             <OverlayScroll class="row-span-1">
-                <div :class="cn('flex gap-6 items-center h-full px-6', 'md:justify-between')">
+                <div :class="cn('flex gap-6 items-center h-full px-6', 'justify-between')">
                     <MeetingRoomHeader></MeetingRoomHeader>
                     <div class="flex gap-3">
                         <MediaToggleButton @toggle="handleMicroToggle" :is-enabled="isMicroEnabled">
@@ -174,9 +175,6 @@ const iconClass = 'size-6'
 </template>
 
 <style scoped>
-.room {
-    height: 850px;
-}
 .video-grid {
     grid-template-columns: repeat(v-bind('gridSize.col'), minmax(0, 1fr));
     grid-template-rows: repeat(v-bind('gridSize.row'), minmax(0, 1fr));
