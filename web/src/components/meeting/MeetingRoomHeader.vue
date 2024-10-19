@@ -3,6 +3,9 @@ import { useMeetingData } from '@/stores/meeting-store'
 import { zeroPad } from '@/lib/left-pad'
 import { useIntervalFn } from '@vueuse/core'
 import { ref } from 'vue'
+import { useTwBreakpoints } from '@/hooks/use-tw-breakpoints'
+
+const breakpoints = useTwBreakpoints()
 
 const meetingData = useMeetingData()
 const timeElapsed = ref('00:00')
@@ -20,9 +23,11 @@ useIntervalFn(() => {
 <template>
     <div class="flex items-center text-lg font-mono gap-2">
         <span> {{ timeElapsed }}</span>
-        <span class="text-gray-500">|</span>
-        <span>
-            {{ meetingData.data.name }}
-        </span>
+        <template v-if="breakpoints.greaterOrEqual('md').value">
+            <span class="text-gray-500">|</span>
+            <span>
+                {{ meetingData.data.name }}
+            </span>
+        </template>
     </div>
 </template>

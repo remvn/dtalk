@@ -20,6 +20,9 @@ import { Meeting } from '@/logic/meeting/meeting-service'
 import type { MeetingRenderMap } from '@/logic/meeting/meeting-renderer'
 import { useRouter } from 'vue-router'
 import { useUserInfo } from '@/stores/user-store'
+import MeetingRoomParticipant from '@/components/meeting/MeetingRoomParticipant.vue'
+import OverlayScroll from '@/components/OverlayScroll.vue'
+import { cn } from '@/lib/utils'
 
 const router = useRouter()
 const userInfo = useUserInfo()
@@ -112,83 +115,72 @@ const iconClass = 'size-6'
 </script>
 
 <template>
-    <div class="flex-grow">
+    <!-- These css below drove me crazy. need to add basis-0  -->
+    <!-- and min-h-0 to prevent it overflow and stay within h-full -->
+    <!-- The same also apply to overlayscroll plugin  -->
+    <div class="flex-grow basis-0 min-h-0">
         <div class="grid grid-rows-10 h-full">
-            <div class="row-span-9 flex">
-                <div class="flex-grow h-full grid video-grid">
-                    <div
-                        class="video-container"
+            <div class="flex row-span-9">
+                <div class="flex-grow grid video-grid lg:px-4 lg:pt-4 gap-2 lg:gap-4">
+                    <MeetingRoomParticipant
                         v-for="item in renderMap.values()"
                         :key="item.participantID"
+                        :item="item"
                     >
-                        <video
-                            v-if="item.videoSrc != null"
-                            class="video"
-                            :srcObject.prop="item.videoSrc"
-                            autoplay
-                        ></video>
-                        <audio
-                            v-if="item.audioSrc != null"
-                            :srcObject.prop="item.audioSrc"
-                            autoplay
-                        ></audio>
-                    </div>
+                    </MeetingRoomParticipant>
                 </div>
                 <div
                     v-if="meetingTab.state.value.isDrawerOpen"
-                    class="w-[358px] h-full p-4 flex-shrink-0"
+                    class="w-[358px] h-full pt-4 px-4 flex-shrink-0"
                 >
                     <MeetingTab></MeetingTab>
                 </div>
             </div>
-            <div class="row-span-1 flex justify-between items-center px-6 py-4">
-                <MeetingRoomHeader></MeetingRoomHeader>
-                <div class="flex gap-3">
-                    <MediaToggleButton @toggle="handleMicroToggle" :is-enabled="isMicroEnabled">
-                        <template #disabled>
-                            <MdiMicrophoneOutline :class="iconClass"></MdiMicrophoneOutline>
-                        </template>
-                        <template #enabled>
-                            <MdiMicrophoneOff :class="iconClass"></MdiMicrophoneOff>
-                        </template>
-                    </MediaToggleButton>
-                    <MediaToggleButton @toggle="handleCameraToggle" :is-enabled="isCameraEnabled">
-                        <template #disabled>
-                            <MdiCameraOutline :class="iconClass"></MdiCameraOutline>
-                        </template>
-                        <template #enabled>
-                            <MdiCameraOff :class="iconClass"></MdiCameraOff>
-                        </template>
-                    </MediaToggleButton>
-                    <Button
-                        @click="handleDisconnect"
-                        size="icon"
-                        class="h-12 w-20 rounded-full"
-                        variant="destructive"
-                    >
-                        <MdiPhoneHangup :class="iconClass"></MdiPhoneHangup>
-                    </Button>
+            <OverlayScroll class="row-span-1">
+                <div :class="cn('flex gap-6 items-center h-full px-6', 'md:justify-between')">
+                    <MeetingRoomHeader></MeetingRoomHeader>
+                    <div class="flex gap-3">
+                        <MediaToggleButton @toggle="handleMicroToggle" :is-enabled="isMicroEnabled">
+                            <template #disabled>
+                                <MdiMicrophoneOutline :class="iconClass"></MdiMicrophoneOutline>
+                            </template>
+                            <template #enabled>
+                                <MdiMicrophoneOff :class="iconClass"></MdiMicrophoneOff>
+                            </template>
+                        </MediaToggleButton>
+                        <MediaToggleButton
+                            @toggle="handleCameraToggle"
+                            :is-enabled="isCameraEnabled"
+                        >
+                            <template #disabled>
+                                <MdiCameraOutline :class="iconClass"></MdiCameraOutline>
+                            </template>
+                            <template #enabled>
+                                <MdiCameraOff :class="iconClass"></MdiCameraOff>
+                            </template>
+                        </MediaToggleButton>
+                        <Button
+                            @click="handleDisconnect"
+                            size="icon"
+                            class="h-12 w-20 rounded-full"
+                            variant="destructive"
+                        >
+                            <MdiPhoneHangup :class="iconClass"></MdiPhoneHangup>
+                        </Button>
+                    </div>
+                    <MeetingTabToggleBar :icon-class="iconClass"></MeetingTabToggleBar>
                 </div>
-                <MeetingTabToggleBar :icon-class="iconClass"></MeetingTabToggleBar>
-            </div>
+            </OverlayScroll>
         </div>
     </div>
 </template>
 
 <style scoped>
+.room {
+    height: 850px;
+}
 .video-grid {
     grid-template-columns: repeat(v-bind('gridSize.col'), minmax(0, 1fr));
     grid-template-rows: repeat(v-bind('gridSize.row'), minmax(0, 1fr));
-}
-.video-container {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.video {
-    width: auto;
-    height: 100%;
 }
 </style>

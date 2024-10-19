@@ -5,6 +5,7 @@ export type MeetingRenderMap = Map<string, MeetingRender>
 
 export type MeetingRender = {
     participantID: string
+    name: string
     videoSrc?: MediaStream
     audioSrc?: MediaStream
 }
@@ -32,12 +33,14 @@ export class MeetingRenderer {
         const map: MeetingRenderMap = new Map()
         const localParticipant = this.room.localParticipant
         map.set(localParticipant.identity, {
+            name: localParticipant.name || 'A',
             videoSrc: this.getVideoStream(localParticipant),
             // dont include local audio
             participantID: localParticipant.identity
         })
         for (const [key, value] of this.room.remoteParticipants) {
             map.set(key, {
+                name: value.name || 'A',
                 participantID: key,
                 videoSrc: this.getVideoStream(value),
                 audioSrc: this.getAudioStream(value)
@@ -57,9 +60,13 @@ export class MeetingRenderer {
         return participant.getTrackPublication(Track.Source.Microphone)?.audioTrack?.mediaStream
     }
 
+    getParticipantCount() {
+        return this.room.remoteParticipants.size + 1
+    }
+
     renderGrid() {
+        this.setGridSize(this.getParticipantCount())
         this.updateRenderMap()
-        this.setGridSize(this.renderMap.value.size)
         triggerRef(this.renderMap)
     }
 }

@@ -10,7 +10,7 @@ import OverlayScroll from '@/components/OverlayScroll.vue'
 </script>
 
 <template>
-    <TabsContent value="participant" class="h-full">
+    <TabsContent value="participant" class="mt-0 h-full">
         <Card class="h-full flex flex-col overflow-hidden">
             <CardHeader class="flex-shrink-0">
                 <CardTitle class="text-lg">Participants</CardTitle>
@@ -23,7 +23,7 @@ import OverlayScroll from '@/components/OverlayScroll.vue'
                     </MeetingInviteDialog>
                 </CardDescription>
             </CardHeader>
-            <OverlayScroll class="flex-grow basis-0">
+            <OverlayScroll class="flex-grow min-h-0 basis-0">
                 <CardContent class="space-y-6">
                     <MeetingTabPartWaiting></MeetingTabPartWaiting>
                     <MeetingTabPartAttending></MeetingTabPartAttending>
