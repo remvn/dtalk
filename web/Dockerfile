@@ -1,5 +1,5 @@
 # 1: build stage
-FROM node:23-bookworm as build 
+FROM node:23-bookworm AS build 
 
 WORKDIR /app
 

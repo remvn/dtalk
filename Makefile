@@ -10,12 +10,22 @@ build:
 run:
 	@go run ./cmd/main
 
-run-web:
-	@cd web && \
-	npm run dev 
-
 run-lk:
 	@livekit-server --dev
+
+docker-build:
+	@docker build -t remvn/dtalk:latest . 
+	@docker build -t remvn/dtalk-web:latest ./web 
+
+docker-publish:
+	@docker push remvn/dtalk:latest
+	@docker push remvn/dtalk-web:latest
+
+compose-up:
+	@docker compose --file ./deploy/docker-compose.yml up 
+
+compose-down:
+	@docker compose --file ./deploy/docker-compose.yml down 
 
 test:
 	@echo "Testing..."
