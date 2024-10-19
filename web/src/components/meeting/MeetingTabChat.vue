@@ -15,7 +15,7 @@ import { TabsContent } from '@/components/ui/tabs'
 
 <template>
     <TabsContent value="chat" class="h-full">
-        <Card class="h-full">
+        <Card class="h-full border-0">
             <CardHeader>
                 <CardTitle>Chat</CardTitle>
                 <CardDescription> You can send messages to other people here. </CardDescription>

@@ -23,6 +23,8 @@ import { useUserInfo } from '@/stores/user-store'
 import MeetingRoomParticipant from '@/components/meeting/MeetingRoomParticipant.vue'
 import OverlayScroll from '@/components/OverlayScroll.vue'
 import { cn } from '@/lib/utils'
+import MeetingTabDialog from '@/components/meeting/MeetingTabDialog.vue'
+import MeetingTabDrawer from '@/components/meeting/MeetingTabDrawer.vue'
 
 const router = useRouter()
 const userInfo = useUserInfo()
@@ -129,12 +131,7 @@ const iconClass = 'size-6'
                     >
                     </MeetingRoomParticipant>
                 </div>
-                <div
-                    v-if="meetingTab.state.value.isDrawerOpen"
-                    class="w-[358px] h-full pt-4 px-4 flex-shrink-0"
-                >
-                    <MeetingTab></MeetingTab>
-                </div>
+                <MeetingTabDrawer></MeetingTabDrawer>
             </div>
             <OverlayScroll class="row-span-1">
                 <div :class="cn('flex gap-6 items-center h-full px-6', 'md:justify-between')">
@@ -172,6 +169,7 @@ const iconClass = 'size-6'
                 </div>
             </OverlayScroll>
         </div>
+        <MeetingTabDialog></MeetingTabDialog>
     </div>
 </template>
 

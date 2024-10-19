@@ -11,7 +11,7 @@ import OverlayScroll from '@/components/OverlayScroll.vue'
 
 <template>
     <TabsContent value="participant" class="mt-0 h-full">
-        <Card class="h-full flex flex-col overflow-hidden">
+        <Card class="h-full flex flex-col overflow-hidden border-0">
             <CardHeader class="flex-shrink-0">
                 <CardTitle class="text-lg">Participants</CardTitle>
                 <CardDescription>
