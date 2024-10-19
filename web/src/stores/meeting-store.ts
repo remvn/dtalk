@@ -6,6 +6,7 @@ type MeetingData = {
     name?: string
     token?: string
     createDate?: Date
+    wsUrl?: string
 }
 
 export const useMeetingData = defineStore('meeting_data', () => {
@@ -16,6 +17,7 @@ export const useMeetingData = defineStore('meeting_data', () => {
         data.name = undefined
         data.token = undefined
         data.createDate = undefined
+        data.wsUrl = undefined
     }
 
     return { data, $reset }

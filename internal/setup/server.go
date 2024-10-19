@@ -4,6 +4,7 @@ import (
 	"dtalk/internal/adapter/lk"
 	"dtalk/internal/adapter/rest/handler"
 	"dtalk/internal/adapter/rest/middleware"
+	"dtalk/internal/app/dtalk"
 	"dtalk/internal/app/logic/meeting"
 	"dtalk/internal/app/port"
 	"dtalk/internal/config"
@@ -24,6 +25,7 @@ type Server struct {
 }
 
 type ServerConfig struct {
+	AppConfig       dtalk.AppConfig
 	AuthTokenConfig config.JwtTokenConfig
 	CORS            []string
 }
@@ -42,6 +44,12 @@ func NewServer(config ServerConfig, lkConfig lk.Config) *Server {
 	parentGroup := echoServer.Group("/api")
 	authMiddleware := middleware.NewAuth(config.AuthTokenConfig)
 	roomAuthMiddleware := middleware.NewRoomAuth(meetingService)
+
+	publicHandler := handler.NewPublicHandler(
+		echoServer,
+		config.AppConfig.LiveKitClientURL,
+	)
+	publicHandler.Register(parentGroup)
 
 	authHandler := handler.NewAuthHandler(
 		config.AuthTokenConfig,

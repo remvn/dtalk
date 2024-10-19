@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { getLkServerURL } from '@/config/config'
 import { useMeetingData } from '@/stores/meeting-store'
 import { onBeforeUnmount, onMounted, provide, ref, shallowRef } from 'vue'
 import { useThrottleFn } from '@vueuse/core'
@@ -30,7 +29,7 @@ const queryClient = useQueryClient()
 
 const meeting = new Meeting({
     token: meetingData.data.token!,
-    url: getLkServerURL(),
+    url: meetingData.data.wsUrl!,
     renderMap: renderMap,
     queryClient: queryClient,
     setGridSize: setGridSize

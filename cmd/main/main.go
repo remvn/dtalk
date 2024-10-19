@@ -2,6 +2,7 @@ package main
 
 import (
 	"dtalk/internal/adapter/lk"
+	"dtalk/internal/app/dtalk"
 	"dtalk/internal/config"
 	"dtalk/internal/setup"
 	"log"
@@ -11,18 +12,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type appConfig struct {
-	AppEnv            string `env:"APP_ENV"`
-	Port              int    `env:"PORT" envDefault:"8080"`
-	AccessTokenSecret string `env:"ACCESS_TOKEN_SECRET,required"`
-	LiveKitHostURL    string `env:"LIVEKIT_HOST_URL,required"`
-	LiveKitAPIKey     string `env:"LIVEKIT_API_KEY,required"`
-	LiveKitAPISecret  string `env:"LIVEKIT_API_SECRET,required"`
-}
-
 func main() {
 	_ = godotenv.Load()
-	appConfig := new(appConfig)
+	appConfig := new(dtalk.AppConfig)
 	err := env.Parse(appConfig)
 	if err != nil {
 		log.Fatal(err)
@@ -43,7 +35,9 @@ func main() {
 		cors = []string{"*"}
 	}
 
+	// setup server a->z
 	serverConf := setup.ServerConfig{
+		AppConfig: *appConfig,
 		AuthTokenConfig: config.JwtTokenConfig{
 			Name:     "access_token",
 			Secret:   []byte(appConfig.AccessTokenSecret),

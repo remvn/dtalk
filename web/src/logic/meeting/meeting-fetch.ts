@@ -36,7 +36,8 @@ function join(body: { room_id: string }) {
         .post<Res>(getURL('/api/meeting/join'), {
             json: body,
             hooks: defaultKyHooks,
-            headers: getAuthHeader()
+            headers: getAuthHeader(),
+            timeout: 2 * 60 * 1000
         })
         .json()
 }

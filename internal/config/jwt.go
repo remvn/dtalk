@@ -42,6 +42,6 @@ func (config JwtTokenConfig) Parse(tokenStr string) (jwt.MapClaims, error) {
 	}
 }
 
-func (config *JwtTokenConfig) GetExpire() time.Time {
+func (config JwtTokenConfig) GetExpire() time.Time {
 	return time.Now().Add(config.Duration)
 }

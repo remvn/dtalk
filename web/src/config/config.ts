@@ -8,16 +8,18 @@ export function getAPIBaseURL() {
         const loc = window.location
         return `${loc.protocol}//${loc.hostname}`
     } else {
-        return 'http://localhost:8080'
+        return 'http://localhost:8000'
     }
 }
 
-export function getLkServerURL() {
-    const mode = getAppMode()
-    if (mode === 'production') {
-        const loc = window.location
-        return `ws://livekit.${loc.hostname}`
-    } else {
-        return 'ws://localhost:7880'
-    }
-}
+// export function getLkServerURL() {
+//     const mode = getAppMode()
+//     if (mode === 'production') {
+//         const loc = window.location
+//         let wsProtocol = 'ws:'
+//         if (loc.protocol === 'https:') wsProtocol = 'wss:'
+//         return `${wsProtocol}//livekit.${loc.hostname}`
+//     } else {
+//         return 'ws://localhost:7880'
+//     }
+// }

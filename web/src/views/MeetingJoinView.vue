@@ -25,6 +25,7 @@ import { HTTPError } from 'ky'
 import { userFetch } from '@/logic/user-fetch'
 import MdiArrowRight from '~icons/mdi/arrow-right'
 import MdiArrowLeft from '~icons/mdi/arrow-left'
+import { publicFetch } from '@/logic/public-fetch'
 
 const props = defineProps({
     room_id: String
@@ -45,6 +46,7 @@ const meetingData = useMeetingData()
 const router = useRouter()
 const loading = ref(false)
 const errorMessage = ref('')
+const lkClientURL = ref<string | undefined>()
 
 const onSubmit = form.handleSubmit(async (values) => {
     loading.value = true
@@ -56,13 +58,18 @@ const onSubmit = form.handleSubmit(async (values) => {
                 token: tokenJson.access_token
             }
         }
+        if (lkClientURL.value == null) {
+            const json = await publicFetch.getLivekitClientURL()
+            lkClientURL.value = json.url
+        }
 
         const json = await meetingFetch.join({ room_id: props.room_id! })
         meetingData.data = {
             id: json.id,
             name: json.name,
             token: json.token,
-            createDate: new Date(json.create_date)
+            createDate: new Date(json.create_date),
+            wsUrl: lkClientURL.value
         }
         router.push('/meeting/room')
     } catch (e: any) {
