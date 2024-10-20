@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"dtalk"
 	"dtalk/internal/pkg/random"
 	"fmt"
 	"os"
@@ -14,7 +15,7 @@ import (
 	"golang.org/x/term"
 )
 
-type AppConfig struct {
+type TemplateData struct {
 	AppPort          int
 	AppDomain        string
 	LiveKitDomain    string
@@ -28,25 +29,29 @@ type AppConfig struct {
 }
 
 func main() {
-	templateDir := "./deploy-template"
-	entries, err := os.ReadDir(templateDir)
+	templateDir := "deploy-template"
+	entries, err := dtalk.EmbedFS.ReadDir(templateDir)
 	if err != nil {
 		panic(err)
 	}
 
-	files := []string{}
+	templateFiles := []string{}
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
 		}
-		files = append(files, entry.Name())
+		templateFiles = append(templateFiles, entry.Name())
 	}
 
 	outputDir := Prompt{
 		name:    "output dir",
 		message: "Output directory: ",
 	}.readStr()
-	config := gatherInput()
+	if len(outputDir) == 0 {
+		panic("output dir is empty")
+	}
+
+	templateData := gatherTemplateData()
 
 	if !confirm(outputDir) {
 		fmt.Println("aborted.")
@@ -63,9 +68,18 @@ func main() {
 		panic(fmt.Errorf("unable to create output dir: %s: %w", outputDir, err))
 	}
 
-	for _, name := range files {
-		data := executeTemplate(name, templateDir, config)
-		writeFile(name, outputDir, data)
+	fmt.Println()
+	fmt.Println("files generated: ")
+
+	for _, name := range templateFiles {
+		templateFile := filepath.Join(templateDir, name)
+		buffer, err := dtalk.EmbedFS.ReadFile(templateFile)
+		if err != nil {
+			panic(fmt.Errorf("unable to read file: %s: %w", templateFile, err))
+		}
+		data := executeTemplate(name, buffer, templateData)
+		outputFile := writeFile(name, outputDir, data)
+		fmt.Println(outputFile)
 	}
 }
 
@@ -77,37 +91,37 @@ func confirm(outputDir string) bool {
 	return answer == "yes"
 }
 
-func gatherInput() AppConfig {
-	config := AppConfig{}
+func gatherTemplateData() TemplateData {
+	data := TemplateData{}
 
 	fmt.Println("Leave input prompt empty to use default values")
-	config.AppPort = Prompt{
+	data.AppPort = Prompt{
 		name:         "app port",
 		message:      "App port (8000): ",
 		defaultValue: "8000",
 	}.readInt()
-	config.AppDomain = Prompt{
+	data.AppDomain = Prompt{
 		name:         "app domain",
 		message:      "App domain: (dtalk.yourdomain.com): ",
 		defaultValue: "dtalk.yourdomain.com",
 	}.readStr()
-	config.LiveKitDomain = Prompt{
+	data.LiveKitDomain = Prompt{
 		name:         "livekit domain",
 		message:      "Livekit domain: (livekit.yourdomain.com): ",
 		defaultValue: "livekit.yourdomain.com",
 	}.readStr()
-	config.DnsProviderToken = Prompt{
+	data.DnsProviderToken = Prompt{
 		name:    "dns provider token",
 		message: "DNS provider token (this template is using cloudflare): ",
 		hide:    true,
 	}.readStr()
 
-	config.LiveKitClientURL = fmt.Sprintf("wss://%s", config.LiveKitDomain)
-	config.LiveKitApiKey = random.RandString(15)
-	config.LiveKitApiSecret = random.RandString(45)
-	config.JwtAccessTokenSecret = random.RandString(45)
-	config.RedisPassword = random.RandString(20)
-	return config
+	data.LiveKitClientURL = fmt.Sprintf("wss://%s", data.LiveKitDomain)
+	data.LiveKitApiKey = random.RandString(15)
+	data.LiveKitApiSecret = random.RandString(45)
+	data.JwtAccessTokenSecret = random.RandString(45)
+	data.RedisPassword = random.RandString(20)
+	return data
 }
 
 type Prompt struct {
@@ -153,27 +167,25 @@ func (p Prompt) readInt() int {
 	return num
 }
 
-func executeTemplate(name string, templateDir string, config AppConfig) []byte {
+func executeTemplate(name string, fileBuffer []byte, data TemplateData) []byte {
 	t := template.New(name)
-	byteArr, err := os.ReadFile(filepath.Join(templateDir, name))
-	if err != nil {
-		panic(fmt.Errorf("unable to read %s: %w", name, err))
-	}
-	t, err = t.Parse(string(byteArr))
+	t, err := t.Parse(string(fileBuffer))
 	if err != nil {
 		panic(fmt.Errorf("unable to parse template %s: %w", name, err))
 	}
 	buffer := new(bytes.Buffer)
-	err = t.Execute(buffer, config)
+	err = t.Execute(buffer, data)
 	if err != nil {
 		panic(fmt.Errorf("unable to execute template %s: %w", name, err))
 	}
 	return buffer.Bytes()
 }
 
-func writeFile(name string, outDir string, data []byte) {
-	err := os.WriteFile(filepath.Join(outDir, name), data, 0640)
+func writeFile(name string, dir string, data []byte) string {
+	file := filepath.Join(dir, name)
+	err := os.WriteFile(file, data, 0640)
 	if err != nil {
 		panic(fmt.Errorf("unable to write file %s: %w", name, err))
 	}
+	return file
 }

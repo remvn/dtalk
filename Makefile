@@ -21,6 +21,9 @@ docker-publish:
 	@docker push remvn/dtalk:latest
 	@docker push remvn/dtalk-web:latest
 
+gen-deploy:
+	@go run ./cmd/gen-deploy
+
 compose-up:
 	@docker compose --file ./deploy/docker-compose.yml up 
 
