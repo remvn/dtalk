@@ -11,6 +11,7 @@ require (
 	github.com/livekit/protocol v1.19.4-0.20240808180722-581b59b65309
 	github.com/livekit/server-sdk-go/v2 v2.2.1
 	github.com/stretchr/testify v1.9.0
+	golang.org/x/term v0.25.0
 )
 
 require (

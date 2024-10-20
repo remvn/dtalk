@@ -40,12 +40,12 @@ func main() {
 		AppConfig: *appConfig,
 		AuthTokenConfig: config.JwtTokenConfig{
 			Name:     "access_token",
-			Secret:   []byte(appConfig.AccessTokenSecret),
+			Secret:   []byte(appConfig.JwtAccessTokenSecret),
 			Duration: time.Hour * 24 * 10,
 		},
 		CORS: cors,
 	}
 	server := setup.NewServer(serverConf, lkConf)
 
-	server.Start(appConfig.Port)
+	server.Start(appConfig.AppPort)
 }
