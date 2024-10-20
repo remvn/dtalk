@@ -3,9 +3,9 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"dtalk"
-	"dtalk/internal/pkg/random"
 	"fmt"
+	"github.com/remvn/dtalk"
+	"github.com/remvn/dtalk/internal/pkg/random"
 	"os"
 	"path/filepath"
 	"strconv"

@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"dtalk/internal/adapter/rest/middleware"
-	"dtalk/internal/app/dtalk"
-	"dtalk/internal/app/port"
 	"fmt"
+	"github.com/remvn/dtalk/internal/adapter/rest/middleware"
+	"github.com/remvn/dtalk/internal/app/dtalk"
+	"github.com/remvn/dtalk/internal/app/port"
 	"log"
 	"net/http"
 	"time"

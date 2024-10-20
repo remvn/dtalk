@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"dtalk/internal/app/dtalk"
 	"errors"
 	"fmt"
+	"github.com/remvn/dtalk/internal/app/dtalk"
 	"log"
 
 	"github.com/labstack/echo/v4"

@@ -1,7 +1,7 @@
 package cmap_test
 
 import (
-	"dtalk/internal/pkg/cmap"
+	"github.com/remvn/dtalk/internal/pkg/cmap"
 	"sync"
 	"testing"
 

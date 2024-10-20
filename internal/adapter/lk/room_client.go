@@ -2,10 +2,10 @@ package lk
 
 import (
 	"context"
-	"dtalk/internal/app/dtalk"
-	"dtalk/internal/app/port"
-	"dtalk/internal/pkg/random"
 	"encoding/json"
+	"github.com/remvn/dtalk/internal/app/dtalk"
+	"github.com/remvn/dtalk/internal/app/port"
+	"github.com/remvn/dtalk/internal/pkg/random"
 	"time"
 
 	"github.com/livekit/protocol/auth"

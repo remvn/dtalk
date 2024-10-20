@@ -1,9 +1,9 @@
 package handler
 
 import (
-	"dtalk/internal/adapter/rest/middleware"
-	"dtalk/internal/config"
-	"dtalk/internal/pkg/random"
+	"github.com/remvn/dtalk/internal/adapter/rest/middleware"
+	"github.com/remvn/dtalk/internal/config"
+	"github.com/remvn/dtalk/internal/pkg/random"
 	"log"
 	"net/http"
 

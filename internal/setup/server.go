@@ -1,14 +1,14 @@
 package setup
 
 import (
-	"dtalk/internal/adapter/lk"
-	"dtalk/internal/adapter/rest/handler"
-	"dtalk/internal/adapter/rest/middleware"
-	"dtalk/internal/app/dtalk"
-	"dtalk/internal/app/logic/meeting"
-	"dtalk/internal/app/port"
-	"dtalk/internal/config"
 	"fmt"
+	"github.com/remvn/dtalk/internal/adapter/lk"
+	"github.com/remvn/dtalk/internal/adapter/rest/handler"
+	"github.com/remvn/dtalk/internal/adapter/rest/middleware"
+	"github.com/remvn/dtalk/internal/app/dtalk"
+	"github.com/remvn/dtalk/internal/app/logic/meeting"
+	"github.com/remvn/dtalk/internal/app/port"
+	"github.com/remvn/dtalk/internal/config"
 	"log"
 
 	"github.com/labstack/echo/v4"

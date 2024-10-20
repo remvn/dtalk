@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"dtalk/internal/app/dtalk"
-	"dtalk/internal/config"
 	"errors"
 	"fmt"
+	"github.com/remvn/dtalk/internal/app/dtalk"
+	"github.com/remvn/dtalk/internal/config"
 	"log"
 	"net/http"
 

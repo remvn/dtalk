@@ -1,10 +1,10 @@
 package main
 
 import (
-	"dtalk/internal/adapter/lk"
-	"dtalk/internal/app/dtalk"
-	"dtalk/internal/config"
-	"dtalk/internal/setup"
+	"github.com/remvn/dtalk/internal/adapter/lk"
+	"github.com/remvn/dtalk/internal/app/dtalk"
+	"github.com/remvn/dtalk/internal/config"
+	"github.com/remvn/dtalk/internal/setup"
 	"log"
 	"time"
 

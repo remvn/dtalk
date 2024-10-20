@@ -1,6 +1,6 @@
 package port
 
-import "dtalk/internal/app/dtalk"
+import "github.com/remvn/dtalk/internal/app/dtalk"
 
 type MeetingServiceIface interface {
 	GetMeeting(roomID string) (*dtalk.Meeting, error)

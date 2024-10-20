@@ -1,4 +1,4 @@
-module dtalk
+module github.com/remvn/dtalk
 
 go 1.23.0
 

@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"bytes"
-	"dtalk/internal/app/port"
 	"encoding/json"
+	"github.com/remvn/dtalk/internal/app/port"
 	"io"
 	"net/http"
 

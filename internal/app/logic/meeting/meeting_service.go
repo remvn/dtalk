@@ -1,9 +1,9 @@
 package meeting
 
 import (
-	"dtalk/internal/app/dtalk"
-	"dtalk/internal/app/port"
-	"dtalk/internal/pkg/cmap"
+	"github.com/remvn/dtalk/internal/app/dtalk"
+	"github.com/remvn/dtalk/internal/app/port"
+	"github.com/remvn/dtalk/internal/pkg/cmap"
 )
 
 var _ port.MeetingServiceIface = (*MeetingService)(nil)
