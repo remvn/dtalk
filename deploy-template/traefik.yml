@@ -4,6 +4,8 @@ log:
 providers:
   docker:
     exposedByDefault: false
+  file:
+    filename: "/etc/traefik/traefik-file.yml"
 
 entryPoints:
   web:
@@ -34,9 +36,8 @@ entryPoints:
     udp:
       timeout: 10s
 
-# uncomment to use traefik dashboard
-# api:
-#   insecure: true
+api:
+  dashboard: false
 
 certificatesResolvers:
   cloudflare:

@@ -7,20 +7,20 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      # uncomment to use traefik dashboard
-      # - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - acme:/acme
       - ./traefik.yml:/etc/traefik/traefik.yml
+      - ./traefik-file.yml:/etc/traefik/traefik-file.yml
+      - acme:/acme
     env_file:
       - ".env.acme"
-    # # uncomment to use traefik dashboard
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.dashboard.rule=Host(`dashboard.yourdomain.com`)"
-    #   - "traefik.http.routers.dashboard.entrypoints=websecure"
-    #   - "traefik.http.routers.dashboard.service=api@internal"
+    labels:
+      - "traefik.enable=false"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.yourdomain.com`)"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.service=api@internal"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   api:
     image: "remvn/dtalk:latest"
@@ -62,16 +62,7 @@ services:
     volumes:
       - ./livekit.yaml:/etc/livekit.yaml
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.livekit.rule=Host(`{{ .LiveKitDomain }}`)"
-      - "traefik.http.routers.livekit.entrypoints=websecure"
-      - "traefik.http.routers.livekit.service=livekit"
-      - "traefik.http.services.livekit.loadbalancer.server.port=7880"
-
-      # udp for websocket
-      - "traefik.udp.routers.livekit-udp.service=livekit-udp"
-      - "traefik.udp.routers.livekit-udp.entrypoints=webudp"
-      - "traefik.udp.services.livekit-udp.loadbalancer.server.port=7880"
+      - "traefik.enable=false"
 
   redis:
     image: redis:7-bookworm

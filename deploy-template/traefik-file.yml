@@ -1,0 +1,24 @@
+http:
+  routers:
+    livekit:
+      rule: "Host(`{{ .LiveKitDomain }}`)"
+      entryPoints:
+        - "websecure"
+      service: "livekit@file"
+  services:
+    livekit:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:7880/"
+
+udp:
+  routers:
+    livekit-udp:
+      entryPoints:
+        - "webudp"
+      service: "livekit-udp@file"
+  services:
+    livekit-udp:
+      loadBalancer:
+        servers:
+          - address: "host.docker.internal:7880"
