@@ -23,8 +23,9 @@ entryPoints:
     udp:
       timeout: 10s
 
-api:
-  insecure: true
+# uncomment to use traefik dashboard
+# api:
+#   insecure: true
 
 certificatesResolvers:
   cloudflare:

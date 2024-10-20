@@ -7,21 +7,23 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
+      # uncomment to use traefik dashboard
+      # - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - acme:/acme
       - ./traefik.yml:/etc/traefik/traefik.yml
     env_file:
       - ".env.acme"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`dashboard.remvn.dev`)"
-      - "traefik.http.routers.dashboard.service=api@internal"
-
-      # tls labels
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.tls=true"
+    # uncomment to use traefik dashboard
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.dashboard.rule=Host(`dashboard.yourdomain.com`)"
+    #   - "traefik.http.routers.dashboard.service=api@internal"
+    #
+    #   # tls labels
+    #   - "traefik.http.routers.dashboard.entrypoints=websecure"
+    #   - "traefik.http.routers.dashboard.tls=true"
 
   api:
     image: "remvn/dtalk:latest"
