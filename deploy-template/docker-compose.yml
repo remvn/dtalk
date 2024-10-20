@@ -1,0 +1,100 @@
+name: dtalk
+
+services:
+  reverse-proxy:
+    image: traefik:v3.1.6
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - acme:/acme
+      - ./traefik.yml:/etc/traefik/traefik.yml
+    env_file:
+      - ".env.acme"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.remvn.dev`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+
+      # tls labels
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls=true"
+
+  api:
+    image: "remvn/dtalk:latest"
+    restart: unless-stopped
+    build:
+      context: ../.
+    env_file:
+      - ".env"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api-router.rule=Host(`{{ .AppDomain }}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.api-router.service=api-service"
+      - "traefik.http.services.api-service.loadbalancer.server.port={{ .AppPort }}"
+
+      # tls labels
+      - "traefik.http.routers.api-router.entrypoints=websecure"
+      - "traefik.http.routers.api-router.tls=true"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  web:
+    image: "remvn/dtalk-web:latest"
+    restart: unless-stopped
+    build:
+      context: ../web
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web-router.rule=Host(`{{ .AppDomain }}`)"
+      - "traefik.http.routers.web-router.service=web-service"
+      - "traefik.http.services.web-service.loadbalancer.server.port=80"
+
+      # tls labels
+      - "traefik.http.routers.web-router.entrypoints=websecure"
+      - "traefik.http.routers.web-router.tls=true"
+
+  # livekit uses some crazy techniques (STUN, TURN, ICE...) to get
+  # around NAT, firewalls, ... inorder to get WebRTC to work.
+  # You can't try to use it without "network_mode: host" anyway
+  # because mapping large range of ports for WebRTC will make Docker freeze
+  livekit:
+    image: livekit/livekit-server:v1.8
+    command: --config /etc/livekit.yaml
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      - redis
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.livekit.rule=Host(`{{ .LiveKitDomain }}`)"
+      - "traefik.http.routers.livekit.service=livekit"
+      - "traefik.http.services.livekit.loadbalancer.server.port=7880"
+
+      # tls labels
+      - "traefik.http.routers.livekit.entrypoints=websecure"
+      - "traefik.http.routers.livekit.tls=true"
+
+      # udp for websocket
+      - "traefik.udp.routers.livekit-udp.service=livekit-udp"
+      - "traefik.udp.routers.livekit-udp.entrypoints=webudp"
+      - "traefik.udp.services.livekit-udp.loadbalancer.server.port=7880"
+
+  redis:
+    image: redis:7-bookworm
+    restart: unless-stopped
+    command: redis-server /etc/redis.conf
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - ./redis.conf:/etc/redis.conf
+
+volumes:
+  acme:
