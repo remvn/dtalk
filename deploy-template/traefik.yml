@@ -1,3 +1,6 @@
+log:
+  level: INFO
+
 providers:
   docker:
     exposedByDefault: false
@@ -13,6 +16,14 @@ entryPoints:
   websecure:
     address: ":443"
     http:
+      # tls default config for every router with
+      # entrypoint=websecure
+      # If there's any user-defined tls labels in docker-compose.yml
+      # this default configuration will not apply anything
+      # see: https://doc.traefik.io/traefik/routing/entrypoints/#tls
+      #
+      # tl;dr: just define your domains here and remove all tls labels
+      # in docker-compose.yml
       tls:
         certResolver: cloudflare
         domains:

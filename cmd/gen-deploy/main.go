@@ -63,7 +63,7 @@ func main() {
 		panic(fmt.Errorf("Can't remove old output dir: %s: %w", outputDir, err))
 	}
 
-	err = os.MkdirAll(outputDir, 0750)
+	err = os.MkdirAll(outputDir, 0755)
 	if err != nil {
 		panic(fmt.Errorf("unable to create output dir: %s: %w", outputDir, err))
 	}
@@ -183,7 +183,7 @@ func executeTemplate(name string, fileBuffer []byte, data TemplateData) []byte {
 
 func writeFile(name string, dir string, data []byte) string {
 	file := filepath.Join(dir, name)
-	err := os.WriteFile(file, data, 0640)
+	err := os.WriteFile(file, data, 0644)
 	if err != nil {
 		panic(fmt.Errorf("unable to write file %s: %w", name, err))
 	}
