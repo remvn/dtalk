@@ -21,6 +21,8 @@ docker-publish:
 	@docker push remvn/dtalk:latest
 	@docker push remvn/dtalk-web:latest
 
+docker-push: docker-build docker-publish
+
 gen-deploy:
 	@go run ./cmd/gen-deploy
 

@@ -14,6 +14,8 @@ const { item } = defineProps<{
             class="video rounded-md"
             :srcObject.prop="item.videoSrc"
             autoplay
+            muted
+            playsinline
         ></video>
         <div
             v-else
