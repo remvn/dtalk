@@ -1,49 +1,21 @@
-# Project dtalk
+# Dtalk - Accountless Meeting & Live-streaming
 
-One Paragraph of project description goes here
+Dtalk is a free, open-source, self-hostable platform for 
+meeting and live-streaming
 
-## Getting Started
+Dtalk is currently hosted here: [dtalk.remvn.dev](https://dtalk.remvn.dev)
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+# Self-host guide 
 
-## MakeFile
+Work in progress. But you can look at `deploy-template` directory 
+to see templates
 
-run all make commands with clean tests
+Generate a deploy directory from the template above:
 ```bash
-make all build
+go run github.com/remvn/dtalk/cmd/gen-deploy@latest
 ```
 
-build the application
-```bash
-make build
-```
+# Back-end architecture
 
-run the application
-```bash
-make run
-```
+Work in progress
 
-Create DB container
-```bash
-make docker-run
-```
-
-Shutdown DB container
-```bash
-make docker-down
-```
-
-live reload the application
-```bash
-make watch
-```
-
-run the test suite
-```bash
-make test
-```
-
-clean up binary from the last build
-```bash
-make clean
-```
