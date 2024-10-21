@@ -101,6 +101,7 @@ onMounted(async () => {
         await meeting.connect()
     } catch (e) {
         console.log('unable to connect')
+        console.log(e)
         router.push('/')
     }
 

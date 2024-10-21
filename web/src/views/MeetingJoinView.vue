@@ -3,7 +3,6 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import * as z from 'zod'
 
-import NavBar from '@/components/NavBar.vue'
 import { Button } from '@/components/ui/button'
 import {
     FormControl,
@@ -15,7 +14,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { useUserInfo } from '@/stores/user-store'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, useTemplateRef } from 'vue'
 import { useMeetingData } from '@/stores/meeting-store'
 import { useRouter } from 'vue-router'
 import ErrorAlert from '@/components/ErrorAlert.vue'
@@ -83,12 +82,16 @@ function handleGoBack() {
     router.push('/')
 }
 
+const firstInputRef = useTemplateRef('first-input')
 const meetingName = ref('TODO')
+
 onMounted(async () => {
     if (props.room_id == null) {
         router.push('/')
         return
     }
+    // see https://github.com/vuejs/core/issues/11337
+    firstInputRef.value?.$el.focus()
     try {
         const json = await meetingFetch.publicData({ room_id: props.room_id })
         meetingName.value = json.name
@@ -115,6 +118,7 @@ onMounted(async () => {
                             <FormLabel>Join under name: </FormLabel>
                             <FormControl>
                                 <Input
+                                    ref="first-input"
                                     type="text"
                                     placeholder="Enter your display name"
                                     v-bind="componentField"
@@ -128,7 +132,7 @@ onMounted(async () => {
                     </FormField>
                     <ErrorAlert :message="errorMessage"></ErrorAlert>
                     <div class="flex items-center justify-between">
-                        <Button @click="handleGoBack" variant="outline">
+                        <Button type="button" @click="handleGoBack" variant="outline">
                             <MdiArrowLeft class="size-4 mr-2"></MdiArrowLeft>
                             Go back
                         </Button>
