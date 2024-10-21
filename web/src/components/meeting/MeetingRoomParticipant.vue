@@ -8,7 +8,7 @@ const { item } = defineProps<{
 </script>
 
 <template>
-    <div ref="container" class="video-container">
+    <div class="video-container">
         <video
             v-if="item.videoSrc != null"
             class="video rounded-md"
