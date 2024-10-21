@@ -31,10 +31,10 @@ entryPoints:
         domains:
           - main: "{{ .AppDomain }}"
           - main: "{{ .LiveKitDomain }}"
-  webudp:
-    address: ":443/udp"
-    udp:
-      timeout: 10s
+  # webudp:
+  #   address: ":443/udp"
+  #   udp:
+  #     timeout: 10s
 
 api:
   dashboard: false
